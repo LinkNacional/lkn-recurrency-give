@@ -39,7 +39,7 @@ class LknRecurrencyGiveI18n
         load_plugin_textdomain(
             'lkn-recurrency-give',
             false,
-            dirname(dirname(plugin_basename(__FILE__))) . '/languages/'
+            dirname(dirname(plugin_basename(__FILE__))) . '/Languages/'
         );
 
     }

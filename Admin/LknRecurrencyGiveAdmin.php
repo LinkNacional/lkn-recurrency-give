@@ -2,6 +2,8 @@
 
 namespace Lkn\RecurrencyGive\Admin;
 
+use Lkn\RecurrencyGive\Includes\LknRecurrencyGiveHelper;
+
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -77,7 +79,9 @@ class LknRecurrencyGiveAdmin
          * class.
          */
 
-        wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/LknRecurrencyGiveAdmin.css', array(), $this->version, 'all');
+        if (isset($_GET['page']) && $_GET['page'] === 'lkn-recurrency') {
+            wp_enqueue_style('lkn-style-settings', plugin_dir_url(__FILE__) . 'css/LknRecurrencyGiveAdmin.css', array(), $this->version, 'all');
+        }
 
     }
 
@@ -101,7 +105,46 @@ class LknRecurrencyGiveAdmin
          * class.
          */
 
-        wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/LknRecurrencyGiveAdmin.js', array( 'jquery' ), $this->version, false);
+        if (isset($_GET['page']) && $_GET['page'] === 'lkn-recurrency') {
+            wp_enqueue_script(
+                'lkn-chart',
+                plugin_dir_url(__FILE__) . 'js/LknRecurrencyGiveChart.js',
+                array('jquery'),
+                $this->version,
+                false
+            );
+
+            wp_enqueue_script(
+                'lkn-chart-adapter-date-fns',
+                plugin_dir_url(__FILE__) . 'js/LknRecurrencyGiveChartAdapterDate.js',
+                array('jquery', 'lkn-chart'),
+                $this->version,
+                false
+            );
+
+            wp_enqueue_script(
+                'lkn-settings-graph',
+                plugin_dir_url(__FILE__) . 'js/LknRecurrencyGiveSettingsGraph.js',
+                array( 'jquery', 'lkn-chart', 'lkn-chart-adapter-date-fns'),
+                $this->version,
+                false
+            );
+
+            wp_localize_script(
+                'lkn-settings-graph',
+                'lknRecurrencyVars',
+                [
+                    'apiUrlBase' => admin_url('admin-ajax.php?action=lkn_get_recurrency_data')
+                ]
+            );
+
+            wp_localize_script(
+                'lkn-settings-graph',
+                'lknRecurrencyTexts',
+                LknRecurrencyGiveHelper::get_texts()
+            );
+        }
+
 
     }
 

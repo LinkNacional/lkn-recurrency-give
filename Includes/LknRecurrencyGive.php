@@ -142,7 +142,19 @@ class LknRecurrencyGive
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
         $this->loader->add_action('admin_menu', $this, 'lkn_recurrency_settings_page');
         $this->loader->add_action('wp_ajax_lkn_get_recurrency_data', $this, 'lkn_handle_get_recurrency_data');
+        $this->loader->add_action('admin_init', $this, 'add_givewp_hooks');
+    }
 
+    public function add_givewp_hooks()
+    {
+        add_filter('give_settings', [$this, 'test_function']);
+    }
+
+    public function test_function($menu_items)
+    {
+        error_log('passei');
+        // $menu_items['nova-guia'] = esc_html__('Minha Nova Guia', 'textdomain');
+        return $menu_items;
     }
 
     public function lkn_recurrency_settings_page()
@@ -153,228 +165,94 @@ class LknRecurrencyGive
             'manage_options',          // Permissão necessária
             'lkn-recurrency',          // Slug único
             array($this, 'lkn_recurrency_render_page'), // Função de renderização
-            'dashicons-list-view',     // Ícone
+            'dashicons-chart-bar',     // Ícone
             25                         // Posição no menu
         );
     }
 
     public function lkn_recurrency_render_page()
     {
-        ?>
-<div class="wrap">
-    <h1><?php esc_html_e('Lkn Recurrency', 'lkn-plugin'); ?>
-    </h1>
-    <div id="lkn-recurrency-data">
-        <p><?php esc_html_e('Carregando dados de pagamentos recorrentes...', 'lkn-plugin'); ?>
-        </p>
-    </div>
-    <div
-        id="lkn-select-container"
-        style="display: none;"
-    >
-        <label for="month-select">Selecione o mês:</label>
-        <select id="month-select">
-            <option value="01">Janeiro</option>
-            <option value="02">Fevereiro</option>
-            <option value="03">Março</option>
-            <option value="04">Abril</option>
-            <option value="05">Maio</option>
-            <option value="06">Junho</option>
-            <option value="07">Julho</option>
-            <option value="08">Agosto</option>
-            <option value="09">Setembro</option>
-            <option value="10">Outubro</option>
-            <option value="11">Novembro</option>
-            <option value="12">Dezembro</option>
-        </select>
-
-        <label for="year-select">Selecione o ano:</label>
-        <select id="year-select">
-            <?php for ($year = 2020; $year <= 2030; $year++) : ?>
-            <option value="<?php echo $year; ?>">
-                <?php echo $year; ?></option>
-            <?php endfor; ?>
-        </select>
-    </div>
-    <div class="chart-container">
-        <canvas id="recurrencyChart"></canvas>
-    </div>
-</div>
-
-<!-- Incluindo Chart.js e o adaptador para datas -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const apiUrlBase =
-            '<?php echo admin_url('admin-ajax.php?action=lkn_get_recurrency_data'); ?>';
-        const monthSelect = document.getElementById('month-select');
-        const yearSelect = document.getElementById('year-select');
-        let chartInstance = null;
-
-        function fetchDataAndRenderChart() {
-            const selectedMonth = monthSelect.value;
-            const selectedYear = yearSelect.value;
-
-            fetch(`${apiUrlBase}&month=${selectedMonth}&year=${selectedYear}`)
-                .then(response => response.json())
-                .then(responseData => {
-                    if (!responseData.success) {
-                        throw new Error(responseData.data?.message || 'Erro desconhecido');
-                    }
-
-                    const data = responseData.data[`${selectedYear}-${selectedMonth}`]; // Dados do backend
-
-                    const container = document.getElementById('lkn-recurrency-data');
-
-                    let labels = [];
-                    let totals = [];
-
-                    const firstDayOfMonth = new Date(selectedYear, selectedMonth - 1, 1);
-                    let donationDate = new Date();
-
-                    if (data) {
-                        const totalDiv = document.createElement('div');
-                        totalDiv.innerHTML = `<strong>Total do mês:</strong> R$ ${data.total.toFixed(2)}`;
-                        container.innerHTML = ''
-                        container.appendChild(totalDiv);
-
-                        labels = data.donations.map(item => {
-                            donationDate = new Date(item.completed_date);
-                            donationDate.setDate(firstDayOfMonth.getDate());
-                            return item.completed_date
-                        }); // Datas das recorrências
-                        totals = data.donations.map(item => parseFloat(item.total.replace(',',
-                        '.'))); // Valores arrecadados
-
-                        labels.unshift(donationDate)
-                    } else {
-                        container.innerHTML = ''
-                    }
-
-
-                    // Exibe os selects de mês e ano
-                    const selectContainer = document.getElementById('lkn-select-container');
-                    selectContainer.style.display = 'block';
-
-                    updateChart(labels, totals);
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar os dados:', error);
-                });
-        }
-
-        function updateChart(labels, data) {
-            const ctx = document.getElementById('recurrencyChart').getContext('2d');
-
-            if (chartInstance) {
-                chartInstance.destroy(); // Destroi o gráfico anterior para criar um novo
-            }
-
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Total arrecadado (R$)',
-                        data: data,
-                        borderColor: 'rgba(52, 59, 69, 1)',          // Preto (#343b45) na linha do gráfico
-                        backgroundColor: 'rgba(211, 216, 0, 0.2)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: 'rgba(52, 59, 69, 1)', // Preto (#343b45) nos pontos
-                        pointBorderColor: 'rgba(52, 59, 69, 1)',
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                parser: 'yyyy-MM-dd HH:mm:ss',
-                                tooltipFormat: 'dd/MM/yyyy HH:mm',
-                                unit: 'day',
-                                displayFormats: {
-                                    day: 'dd/MM/yyyy'
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Data'
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            suggestedMax: Math.max(...data) + 5,
-                            title: {
-                                display: true,
-                                text: 'Valor em R$'
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(tooltipItem) {
-                                    return `R$ ${tooltipItem.raw.toFixed(2)}`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Event listeners para os selects
-        monthSelect.addEventListener('change', fetchDataAndRenderChart);
-        yearSelect.addEventListener('change', fetchDataAndRenderChart);
-
-        // Carrega os dados iniciais
-        fetchDataAndRenderChart();
-    });
-</script>
-<?php
+        require LKN_RECURRENCY_GIVE_DIR . 'Admin/partials/LknRecurrencyGiveGraphDisplay.php';
     }
 
     public function lkn_handle_get_recurrency_data()
     {
-        // Verifica a permissão do usuário
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => 'Permissão negada.'], 403);
-        }
-
         global $wpdb;
 
-        // Consulta os donation_id onde o meta_key é "_give_is_donation_recurring" e o meta_value >= 1
-        $sql = "
-        SELECT DISTINCT dm.donation_id
-        FROM {$wpdb->prefix}give_donationmeta dm
-        WHERE dm.meta_key = '_give_is_donation_recurring'
-        AND dm.meta_value = 1
-    ";
+        // Get year, month, currency, and mode parameters
+        $month_param = isset($_GET['month']) ? sanitize_text_field($_GET['month']) : '';
+        $year_param = isset($_GET['year']) ? sanitize_text_field($_GET['year']) : '';
+        $currency_param = isset($_GET['currency']) ? sanitize_text_field($_GET['currency']) : '';
+        $mode_param = isset($_GET['mode']) ? sanitize_text_field($_GET['mode']) : '';
 
-        // Executa a consulta e retorna os resultados
+        // Check if month parameter is provided
+        if (empty($month_param)) {
+            wp_send_json_error(['message' => sprintf(__('No parameter for <strong>%s</strong> was found.', 'lkn-recurrency-give'), 'month')]);
+        }
+
+        // Check if year parameter is provided
+        if (empty($year_param)) {
+            wp_send_json_error(['message' => sprintf(__('No parameter for <strong>%s</strong> was found.', 'lkn-recurrency-give'), 'year')]);
+        }
+
+        // Check if currency parameter is provided
+        if (empty($currency_param)) {
+            wp_send_json_error(['message' => sprintf(__('No parameter for <strong>%s</strong> was found.', 'lkn-recurrency-give'), 'currency')]);
+        }
+
+        // Check if mode parameter is provided
+        if (empty($mode_param)) {
+            wp_send_json_error(['message' => sprintf(__('No parameter for <strong>%s</strong> was found.', 'lkn-recurrency-give'), 'mode')]);
+        }
+
+        $month_key = "{$year_param}-{$month_param}";
+
+        $data_grouped = [
+            $month_key => [
+                'total' => 0,
+                'donations' => []
+            ]
+        ];
+
+        // Check user permissions
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Permission denied.', 'lkn-recurrency-give')], 403);
+        }
+
+        $start_date = "{$year_param}-{$month_param}-01 00:00:00";
+        $end_date = date("Y-m-t 23:59:59", strtotime($start_date));
+
+        // Custom query
+        $sql = $wpdb->prepare(
+            "
+        SELECT DISTINCT donation_id
+        FROM {$wpdb->prefix}give_donationmeta
+        WHERE (meta_key = '_give_is_donation_recurring' AND meta_value = 1)
+           OR (meta_key = '_give_payment_currency' AND meta_value = %s)
+           OR (meta_key = '_give_payment_mode' AND meta_value = %s)
+           OR (meta_key = '_give_completed_date' AND meta_value BETWEEN %s AND %s)
+        GROUP BY donation_id
+        HAVING COUNT(DISTINCT meta_key) = 4
+        ",
+            $currency_param,
+            $mode_param,
+            $start_date,
+            $end_date
+        );
+
         $results = $wpdb->get_results($sql);
 
-        // Verifica se existem resultados
         if (!empty($results)) {
             $donation_ids = array_map(function ($result) {
                 return $result->donation_id;
             }, $results);
         } else {
-            $donation_ids = [];
+            wp_send_json_success($data_grouped);
         }
 
         if (!empty($donation_ids)) {
-            // Gera uma lista de placeholders para a cláusula IN da consulta SQL
             $placeholders = implode(',', array_fill(0, count($donation_ids), '%d'));
 
-            // Consulta os dados de interesse com base nos donation_ids
             $sql = "
             SELECT dm.donation_id, dm.meta_key, dm.meta_value
             FROM {$wpdb->prefix}give_donationmeta dm
@@ -382,6 +260,7 @@ class LknRecurrencyGive
             AND dm.meta_key IN (
                 '_give_payment_total',
                 '_give_payment_currency',
+                '_give_payment_donor_id',
                 '_give_donor_billing_first_name',
                 '_give_donor_billing_last_name',
                 '_give_payment_donor_email',
@@ -390,68 +269,58 @@ class LknRecurrencyGive
             )
         ";
 
-            // Executa a consulta com os donation_ids
             $results = $wpdb->get_results($wpdb->prepare($sql, ...$donation_ids));
 
-            // Organiza os resultados por donation_id
             $donation_data = [];
             foreach ($results as $result) {
-                // Se o donation_id ainda não foi adicionado ao array, cria uma entrada para ele
                 if (!isset($donation_data[$result->donation_id])) {
                     $donation_data[$result->donation_id] = [];
                 }
-
-                // Adiciona o valor para a meta_key correspondente
                 $donation_data[$result->donation_id][$result->meta_key] = $result->meta_value;
             }
 
-            // Estrutura os dados para exibição
             $data = [];
             foreach ($donation_data as $donation_id => $donation_info) {
-                // Adiciona 1 mês à data de completamento
                 $completed_date = isset($donation_info['_give_completed_date']) ? $donation_info['_give_completed_date'] : null;
                 $completed_date_plus_month = null;
 
                 if ($completed_date) {
                     $date = new \DateTime($completed_date);
-                    $date->modify('+1 month'); // Adiciona 1 mês
+                    $date->modify('+1 month');
                     $completed_date_plus_month = $date->format('Y-m-d H:i:s');
                 }
 
-                // Consulta na tabela wp_give_subscriptions usando a data ajustada
                 if ($completed_date_plus_month) {
                     $sql_sub = "
-                    SELECT period, frequency, profile_id, expiration
-                    FROM {$wpdb->prefix}give_subscriptions
-                    WHERE expiration = %s
-                ";
+                SELECT period, frequency, profile_id, expiration
+                FROM {$wpdb->prefix}give_subscriptions
+                WHERE expiration = %s
+            ";
                     $sub_results = $wpdb->get_results($wpdb->prepare($sql_sub, $completed_date_plus_month, $donation_id));
 
-                    // Obtem os dados de assinatura
                     $subscription_data = [];
                     if (!empty($sub_results)) {
                         $subscription_data = $sub_results[0];
                     }
 
-                    // Adiciona os dados ao array final
                     $data[] = [
                         'donation_id' => $donation_id,
-                        'total' => isset($donation_info['_give_payment_total']) ? number_format($donation_info['_give_payment_total'], 2, ',', '.') : 'N/A',
-                        'currency' => $donation_info['_give_payment_currency'] ?? 'N/A',
-                        'first_name' => $donation_info['_give_donor_billing_first_name'] ?? 'N/A',
-                        'last_name' => $donation_info['_give_donor_billing_last_name'] ?? 'N/A',
-                        'email' => $donation_info['_give_payment_donor_email'] ?? 'N/A',
-                        'payment_mode' => $donation_info['_give_payment_mode'] ?? 'N/A',
-                        'completed_date' => $donation_info['_give_completed_date'] ?? 'N/A',
-                        'subscription_period' => $subscription_data->period ?? 'N/A',
-                        'subscription_frequency' => $subscription_data->frequency ?? 'N/A',
-                        'subscription_profile_id' => $subscription_data->profile_id ?? 'N/A',
-                        'expiration' => $subscription_data->expiration ?? 'N/A'
+                        'user_id' => $donation_info['_give_payment_donor_id'],
+                        'total' => isset($donation_info['_give_payment_total']) ? number_format($donation_info['_give_payment_total'], 2, ',', '.') : __('N/A', 'lkn-recurrency-give'),
+                        'currency' => $donation_info['_give_payment_currency'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'first_name' => $donation_info['_give_donor_billing_first_name'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'last_name' => $donation_info['_give_donor_billing_last_name'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'email' => $donation_info['_give_payment_donor_email'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'payment_mode' => $donation_info['_give_payment_mode'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'completed_date' => $donation_info['_give_completed_date'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'subscription_period' => $subscription_data->period ?? __('N/A', 'lkn-recurrency-give'),
+                        'subscription_frequency' => $subscription_data->frequency ?? __('N/A', 'lkn-recurrency-give'),
+                        'subscription_profile_id' => $subscription_data->profile_id ?? __('N/A', 'lkn-recurrency-give'),
+                        'expiration' => $subscription_data->expiration ?? __('N/A', 'lkn-recurrency-give')
                     ];
                 }
             }
 
-            $data_grouped = [];
             foreach ($data as $entry) {
                 $month = date('Y-m', strtotime($entry['completed_date']));
                 if (!isset($data_grouped[$month])) {
@@ -466,7 +335,7 @@ class LknRecurrencyGive
 
             wp_send_json_success($data_grouped);
         } else {
-            wp_send_json_error(['message' => 'Nenhum donation_id encontrado.']);
+            wp_send_json_error(['message' => __('No donation ID found.', 'lkn-recurrency-give')]);
         }
     }
 
@@ -532,4 +401,3 @@ class LknRecurrencyGive
     }
 
 }
-?>
