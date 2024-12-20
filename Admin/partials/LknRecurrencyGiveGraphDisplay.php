@@ -2,7 +2,7 @@
 $currentYear = date("Y");
 $currentMonth = date("m");
 ?>
-<div class="wrap">
+<div class="lkn-wrap">
     <div id="lkn-recurrency-loading">
         <img
             src="<?php echo LKN_RECURRENCY_GIVE_URL . 'Includes/assets/gifs/loading.gif';?>"
@@ -122,19 +122,15 @@ $currentMonth = date("m");
         </div>
 
         <div id="lkn-cust-total">
+            <img
+                src="<?php echo LKN_RECURRENCY_GIVE_URL . 'Includes/assets/icons/cash.svg';?>"
+                alt="<?php _e('Cash icon', 'lkn-recurrency-give'); ?>"
+                class="lkn-background-icon"
+            >
             <div class="lkn-title-card">
                 <h3><?php _e('Total amount (Monthly)', 'lkn-recurrency-give'); ?></h3>
-                <button
-                    title="<?php _e('General Review', 'lkn-recurrency-give'); ?>"
-                    id="lkn-review-button"
-                >
-                    <img
-                        src="<?php echo LKN_RECURRENCY_GIVE_URL . 'Includes/assets/icons/review.svg';?>"
-                        alt="<?php _e('Review icon', 'lkn-recurrency-give'); ?>"
-                    >
-                </button>
             </div>
-            <div id="lkn-value"><span>R$ 0.00</span></div>
+            <div id="lkn-value" class="lkn-total-amount"><p>R$ 0.00</p></div>
         </div>
     </div>
 
@@ -160,4 +156,94 @@ $currentMonth = date("m");
             <div id="lkn-modal-content"></div>
         </div>
     </div>
+
+    <div class="lkn-review-container">
+        <div class="lkn-review-card">
+            <img
+                src="<?php echo LKN_RECURRENCY_GIVE_URL . 'Includes/assets/icons/moneyBag.svg';?>"
+                alt="<?php _e('Cash icon', 'lkn-recurrency-give'); ?>"
+                class="lkn-background-icon"
+            >
+            <div class="lkn-title-card">
+                <h3><?php _e('Expected amount for next month', 'lkn-recurrency-give'); ?></h3>
+            </div>
+            <div id="lkn-value-review-monthly" class="lkn-total-amount"><p>R$ 0.00</p></div>
+        </div>
+        <div class="lkn-review-card">
+            <img
+                src="<?php echo LKN_RECURRENCY_GIVE_URL . 'Includes/assets/icons/moneyPig.svg';?>"
+                alt="<?php _e('Cash icon', 'lkn-recurrency-give'); ?>"
+                class="lkn-background-icon"
+            >
+            <div class="lkn-title-card">
+                <h3><?php _e('Expected amount for the year', 'lkn-recurrency-give'); ?></h3>
+            </div>
+            <div id="lkn-value-review-yearly" class="lkn-total-amount"><p>R$ 0.00</p></div>
+        </div>
+    </div>
+
+    <div id="lkn-table">
+        <div class="lkn-title-table">
+            <h3><?php _e('Recurring Donations Table', 'lkn-recurrency-give'); ?></h3>
+        </div>
+        <div id="lkn-table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th><?php _e('Creation Date', 'lkn-recurrency-give'); ?></th>
+                        <th><?php _e('Expiration Date', 'lkn-recurrency-give'); ?></th>
+                        <th><?php _e('Name', 'lkn-recurrency-give'); ?></th>
+                        <th><?php _e('Value', 'lkn-recurrency-give'); ?></th>
+                        <th><?php _e('User ID', 'lkn-recurrency-give'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="lkn-review-five-container">
+        <div id="lkn-top-five-donations" class="lkn-review-five-card">
+            <div class="lkn-title-table">
+                <h3><?php _e('Top 5 Donors', 'lkn-recurrency-give'); ?></h3>
+            </div>
+            <div class="lkn-top-five-donation-container">
+                <canvas id="top-five-donations-chart"></canvas>
+            </div>
+        </div>
+        <div id="lkn-last-five-donations" class="lkn-review-five-card">
+            <img
+                src="<?php echo LKN_RECURRENCY_GIVE_URL . 'Includes/assets/icons/stackOfCoins.svg';?>"
+                alt="<?php _e('Cash icon', 'lkn-recurrency-give'); ?>"
+                class="lkn-five-background-icon"
+            >
+            <div class="lkn-title-table">
+                <h3><?php _e('Last 5 Donations', 'lkn-recurrency-give'); ?></h3>
+            </div>
+            <div id="lkn-top-last-donations-list">
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="lkn-footer">
+        <a
+            href="https://www.linknacional.com.br/"
+            title="<?php _e('Link Nacional Page', 'lkn-recurrency-give'); ?>"
+            class="lkn-footer-logo-container"
+            target="_blank"
+        >
+            <div class="lkn-image-logo-div">
+                <img
+                    class="lkn-image-logo"
+                    src="<?php echo LKN_RECURRENCY_GIVE_URL . 'Includes/assets/images/link-logo.png';?>"
+                    alt="<?php _e('Link Nacional Logo', 'lkn-recurrency-give'); ?>"
+                >
+            </div>
+        </a>
+
+        <p><?php _e('Developed by', 'lkn-recurrency-give'); ?> <strong>Link Nacional</strong></p>
+    </footer>
 </div>

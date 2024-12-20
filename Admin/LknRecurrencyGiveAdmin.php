@@ -79,7 +79,7 @@ class LknRecurrencyGiveAdmin
          * class.
          */
 
-        if (isset($_GET['page']) && $_GET['page'] === 'lkn-recurrency') {
+        if (isset($_GET['page']) && $_GET['page'] === 'give-reports' && (!isset($_GET['legacy']) || $_GET['legacy'] !== 'true')) {
             wp_enqueue_style('lkn-style-settings', plugin_dir_url(__FILE__) . 'css/LknRecurrencyGiveAdmin.css', array(), $this->version, 'all');
         }
 
@@ -105,7 +105,7 @@ class LknRecurrencyGiveAdmin
          * class.
          */
 
-        if (isset($_GET['page']) && $_GET['page'] === 'lkn-recurrency') {
+        if (isset($_GET['page']) && $_GET['page'] === 'give-reports' && (!isset($_GET['legacy']) || $_GET['legacy'] !== 'true')) {
             wp_enqueue_script(
                 'lkn-chart',
                 plugin_dir_url(__FILE__) . 'js/LknRecurrencyGiveChart.js',
@@ -134,7 +134,8 @@ class LknRecurrencyGiveAdmin
                 'lkn-settings-graph',
                 'lknRecurrencyVars',
                 [
-                    'apiUrlBase' => admin_url('admin-ajax.php?action=lkn_get_recurrency_data')
+                    'apiUrlBase' => admin_url('admin-ajax.php?action=lkn_get_recurrency_data'),
+                    'urlWebsite' => LKN_RECURRENCY_GIVE_URL
                 ]
             );
 

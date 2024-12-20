@@ -211,10 +211,13 @@ class LknRecurrencyGive
             wp_send_json_error(['message' => sprintf(__('No parameter for <strong>%s</strong> was found.', 'lkn-recurrency-give'), 'mode')]);
         }
 
+        $month_key = "{$year_param}-{$month_param}";
+
         $data_grouped = [
-            'date' => '',
-            'total' => 0,
-            'donations' => []
+            $month_key => [
+                'total' => 0,
+                'donations' => []
+            ]
         ];
 
         // Check user permissions
@@ -222,120 +225,122 @@ class LknRecurrencyGive
             wp_send_json_error(['message' => __('Permission denied.', 'lkn-recurrency-give')], 403);
         }
 
-        // Start between initial date
         $start_date = "{$year_param}-{$month_param}-01 00:00:00";
         $end_date = date("Y-m-t 23:59:59", strtotime($start_date));
 
-        $results = $wpdb->get_results(
-            $wpdb->prepare(
-                "
-                SELECT
-                    meta_donor.donation_id,
-                    meta_billing_first_name.meta_value AS billing_first_name,
-                    meta_billing_last_name.meta_value AS billing_last_name,
-                    meta_email.meta_value AS donor_email,
-                    meta_currency.meta_value AS payment_currency,
-                    meta_recurring.meta_value AS is_recurring,
-                    subs.customer_id,
-                    subs.frequency,
-                    subs.recurring_amount,
-                    subs.payment_mode,
-                    subs.created,
-                    subs.expiration,
-                    subs.profile_id
-                FROM
-                    {$wpdb->prefix}give_subscriptions AS subs
-                LEFT JOIN
-                    {$wpdb->prefix}give_donationmeta AS meta_donor
-                    ON subs.customer_id = meta_donor.meta_value
-                    AND meta_donor.meta_key = '_give_payment_donor_id'
-                LEFT JOIN
-                    {$wpdb->prefix}give_donationmeta AS meta_billing_first_name
-                    ON meta_donor.donation_id = meta_billing_first_name.donation_id
-                    AND meta_billing_first_name.meta_key = '_give_donor_billing_first_name'
-                LEFT JOIN
-                    {$wpdb->prefix}give_donationmeta AS meta_billing_last_name
-                    ON meta_donor.donation_id = meta_billing_last_name.donation_id
-                    AND meta_billing_last_name.meta_key = '_give_donor_billing_last_name'
-                LEFT JOIN
-                    {$wpdb->prefix}give_donationmeta AS meta_email
-                    ON meta_donor.donation_id = meta_email.donation_id
-                    AND meta_email.meta_key = '_give_payment_donor_email'
-                LEFT JOIN
-                    {$wpdb->prefix}give_donationmeta AS meta_currency
-                    ON meta_donor.donation_id = meta_currency.donation_id
-                    AND meta_currency.meta_key = '_give_payment_currency'
-                LEFT JOIN
-                    {$wpdb->prefix}give_donationmeta AS meta_recurring
-                    ON meta_donor.donation_id = meta_recurring.donation_id
-                    AND meta_recurring.meta_key = '_give_is_donation_recurring'
-                WHERE
-                    subs.status = 'active'
-                    AND meta_recurring.meta_value = '1'
-                    AND (subs.created BETWEEN %s AND %s OR subs.expiration BETWEEN %s AND %s)
-                    AND subs.payment_mode = %s
-                    AND meta_currency.meta_value = %s
-                GROUP BY
-                    meta_donor.donation_id
-                ",
-                $start_date,
-                $end_date,
-                $start_date,
-                $end_date,
-                $mode_param,
-                $currency_param
-            )
+        // Custom query
+        $sql = $wpdb->prepare(
+            "
+                SELECT DISTINCT donation_id
+                FROM {$wpdb->prefix}give_donationmeta
+                WHERE (meta_key = '_give_is_donation_recurring' AND meta_value = 1)
+                OR (meta_key = '_give_payment_currency' AND meta_value = %s)
+                OR (meta_key = '_give_payment_mode' AND meta_value = %s)
+                OR (meta_key = '_give_completed_date' AND meta_value BETWEEN %s AND %s)
+                GROUP BY donation_id
+                HAVING COUNT(DISTINCT meta_key) = 4
+            ",
+            $currency_param,
+            $mode_param,
+            $start_date,
+            $end_date
         );
 
-        $date_key = "{$year_param}-{$month_param}";
-        if ($currency_param === 'BRL') {
-            $date_key = "{$month_param}-{$year_param}";
+        $results = $wpdb->get_results($sql);
+
+        if (!empty($results)) {
+            $donation_ids = array_map(function ($result) {
+                return $result->donation_id;
+            }, $results);
+        } else {
+            wp_send_json_success($data_grouped);
         }
 
+        if (!empty($donation_ids)) {
+            $placeholders = implode(',', array_fill(0, count($donation_ids), '%d'));
 
-        // Start between next month
-        $start_next_month = date("Y-m-01 00:00:00", strtotime("+1 month", strtotime($start_date)));
-        $end_next_month = date("Y-m-t 23:59:59", strtotime($start_next_month));
+            $sql = "
+            SELECT dm.donation_id, dm.meta_key, dm.meta_value
+            FROM {$wpdb->prefix}give_donationmeta dm
+            WHERE dm.donation_id IN ($placeholders)
+            AND dm.meta_key IN (
+                '_give_payment_total',
+                '_give_payment_currency',
+                '_give_payment_donor_id',
+                '_give_donor_billing_first_name',
+                '_give_donor_billing_last_name',
+                '_give_payment_donor_email',
+                '_give_payment_mode',
+                '_give_completed_date'
+            )
+        ";
 
-        $query = $wpdb->prepare(
-            "SELECT SUM(recurring_amount) as total_amount
-            FROM {$wpdb->prefix}give_subscriptions
-            WHERE expiration BETWEEN %s AND %s",
-            $start_next_month,
-            $end_next_month
-        );
+            $results = $wpdb->get_results($wpdb->prepare($sql, ...$donation_ids));
 
-        $result_month_amount = $wpdb->get_var($query);
-        $total_month_amount = number_format($result_month_amount, 2);
-
-
-        // Start between initial year and final year
-        $start_year = "{$year_param}-01-01 00:00:00";
-        $end_year = "{$year_param}-12-31 23:59:59";
-
-        $query = $wpdb->prepare(
-            "SELECT SUM(recurring_amount) as total_amount
-            FROM {$wpdb->prefix}give_subscriptions
-            WHERE created BETWEEN %s AND %s",
-            $start_year,
-            $end_year
-        );
-
-        $result_annual_amount = $wpdb->get_var($query);
-        $total_annual_amount = number_format($result_annual_amount, 2);
-
-        // Process the results
-        if (!empty($results)) {
+            $donation_data = [];
             foreach ($results as $result) {
-                $created_date = \DateTime::createFromFormat('Y-m-d H:i:s', $result->created);
-                $result->day = $created_date ? $created_date->format('d') : null;
-
-                $data_grouped['total'] += $result->recurring_amount;
-                $data_grouped['donations'][] = $result;
+                if (!isset($donation_data[$result->donation_id])) {
+                    $donation_data[$result->donation_id] = [];
+                }
+                $donation_data[$result->donation_id][$result->meta_key] = $result->meta_value;
             }
-            $data_grouped['date'] = $date_key;
-            $data_grouped['next_month_total'] = (float) $total_month_amount;
-            $data_grouped['annual_total'] = (float) $total_annual_amount;
+
+            $data = [];
+            foreach ($donation_data as $donation_id => $donation_info) {
+                $completed_date = isset($donation_info['_give_completed_date']) ? $donation_info['_give_completed_date'] : null;
+                $completed_date_plus_month = null;
+
+                if ($completed_date) {
+                    $date = new \DateTime($completed_date);
+                    $date->modify('+1 month');
+                    $completed_date_plus_month = $date->format('Y-m-d H:i:s');
+                }
+
+                if ($completed_date_plus_month) {
+                    $sql_sub = "
+                        SELECT period, frequency, profile_id, expiration
+                        FROM {$wpdb->prefix}give_subscriptions
+                        WHERE expiration = %s
+                    ";
+
+                    $sub_results = $wpdb->get_results($wpdb->prepare($sql_sub, $completed_date_plus_month, $donation_id));
+
+                    $subscription_data = [];
+
+                    if (!empty($sub_results)) {
+                        $subscription_data = $sub_results[0];
+                    }
+
+                    $data[] = [
+                        'donation_id' => $donation_id,
+                        'user_id' => $donation_info['_give_payment_donor_id'],
+                        'total' => isset($donation_info['_give_payment_total']) ? number_format($donation_info['_give_payment_total'], 2, ',', '.') : __('N/A', 'lkn-recurrency-give'),
+                        'currency' => $donation_info['_give_payment_currency'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'first_name' => $donation_info['_give_donor_billing_first_name'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'last_name' => $donation_info['_give_donor_billing_last_name'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'email' => $donation_info['_give_payment_donor_email'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'payment_mode' => $donation_info['_give_payment_mode'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'completed_date' => $donation_info['_give_completed_date'] ?? __('N/A', 'lkn-recurrency-give'),
+                        'subscription_period' => $subscription_data->period ?? __('N/A', 'lkn-recurrency-give'),
+                        'subscription_frequency' => $subscription_data->frequency ?? __('N/A', 'lkn-recurrency-give'),
+                        'subscription_profile_id' => $subscription_data->profile_id ?? __('N/A', 'lkn-recurrency-give'),
+                        'expiration' => $subscription_data->expiration ?? __('N/A', 'lkn-recurrency-give')
+                    ];
+                }
+            }
+
+            foreach ($data as $entry) {
+                $month = date('Y-m', strtotime($entry['completed_date']));
+                if (!isset($data_grouped[$month])) {
+                    $data_grouped[$month] = [
+                        'total' => 0,
+                        'donations' => [],
+                    ];
+                }
+                $data_grouped[$month]['total'] += floatval(str_replace(',', '.', $entry['total']));
+                $entry['total'] = floatval(str_replace(',', '.', $entry['total']));
+                $data_grouped[$month]['donations'][] = $entry;
+            }
 
             wp_send_json_success($data_grouped);
         } else {

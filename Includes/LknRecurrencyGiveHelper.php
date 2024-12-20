@@ -9,6 +9,7 @@ class LknRecurrencyGiveHelper
         return [
             'total_donations' => __('Total donations', 'lkn-recurrency-give'),
             'date_label' => __('Dates', 'lkn-recurrency-give'),
+            'day_label' => __('Day', 'lkn-recurrency-give'),
             'num_donations' => __('Number of donations:', 'lkn-recurrency-give'),
             'no_data' => __('No data for the selected month.', 'lkn-recurrency-give'),
             'no_data_day' => __('No data for the selected day.', 'lkn-recurrency-give'),
@@ -20,7 +21,7 @@ class LknRecurrencyGiveHelper
             'name' => __('Name:', 'lkn-recurrency-give'),
             'email' => __('Email:', 'lkn-recurrency-give'),
             'payment_mode' => __('Payment Mode:', 'lkn-recurrency-give'),
-            'completion_date' => __('Completion Date:', 'lkn-recurrency-give'),
+            'creation_date' => __('Creation Date:', 'lkn-recurrency-give'),
             'expiration' => __('Expiration:', 'lkn-recurrency-give'),
         ];
     }
