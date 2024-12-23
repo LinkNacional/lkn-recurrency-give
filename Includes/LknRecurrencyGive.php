@@ -141,7 +141,6 @@ class LknRecurrencyGive
 
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
-        $this->loader->add_action('admin_menu', $this, 'lkn_recurrency_settings_page');
         $this->loader->add_action('wp_ajax_lkn_get_recurrency_data', $this, 'lkn_handle_get_recurrency_data');
         $this->loader->add_action('rest_api_init', $this, 'registerApiRoute');
 
@@ -163,19 +162,6 @@ class LknRecurrencyGive
         return new WP_REST_Response($content, 200);
     }
 
-    public function lkn_recurrency_settings_page()
-    {
-        add_menu_page(
-            'Lkn Recurrency',          // Título da página
-            'Lkn Recurrency',          // Nome do menu
-            'manage_options',          // Permissão necessária
-            'lkn-recurrency',          // Slug único
-            array($this, 'lkn_recurrency_render_page'), // Função de renderização
-            'dashicons-chart-bar',     // Ícone
-            25                         // Posição no menu
-        );
-    }
-
     public function lkn_recurrency_render_page()
     {
         require LKN_RECURRENCY_GIVE_DIR . 'Admin/partials/LknRecurrencyGiveGraphDisplay.php';
@@ -185,29 +171,38 @@ class LknRecurrencyGive
     {
         global $wpdb;
 
+        if (!isset($_GET['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['nonce'])), 'lkn_recurrency_nonce')) {
+            wp_send_json_error(array('message' => esc_html__('Nonce verification failed.', 'lkn-recurrency-give')));
+            return;
+        }
+
         // Get year, month, currency, and mode parameters
-        $month_param = isset($_GET['month']) ? sanitize_text_field($_GET['month']) : '';
-        $year_param = isset($_GET['year']) ? sanitize_text_field($_GET['year']) : '';
-        $currency_param = isset($_GET['currency']) ? sanitize_text_field($_GET['currency']) : '';
-        $mode_param = isset($_GET['mode']) ? sanitize_text_field($_GET['mode']) : '';
+        $month_param = isset($_GET['month']) ? sanitize_text_field(wp_unslash($_GET['month'])) : '';
+        $year_param = isset($_GET['year']) ? sanitize_text_field(wp_unslash($_GET['year'])) : '';
+        $currency_param = isset($_GET['currency']) ? sanitize_text_field(wp_unslash($_GET['currency'])) : '';
+        $mode_param = isset($_GET['mode']) ? sanitize_text_field(wp_unslash($_GET['mode'])) : '';
 
         // Check if month parameter is provided
         if (empty($month_param)) {
+            // translators: %s is the name of the parameter (e.g., "month").
             wp_send_json_error(['message' => sprintf(__('No parameter for <strong>%s</strong> was found.', 'lkn-recurrency-give'), 'month')]);
         }
 
         // Check if year parameter is provided
         if (empty($year_param)) {
+            // translators: %s is the name of the parameter (e.g., "year").
             wp_send_json_error(['message' => sprintf(__('No parameter for <strong>%s</strong> was found.', 'lkn-recurrency-give'), 'year')]);
         }
 
         // Check if currency parameter is provided
         if (empty($currency_param)) {
+            // translators: %s is the name of the parameter (e.g., "currency").
             wp_send_json_error(['message' => sprintf(__('No parameter for <strong>%s</strong> was found.', 'lkn-recurrency-give'), 'currency')]);
         }
 
         // Check if mode parameter is provided
         if (empty($mode_param)) {
+            // translators: %s is the name of the parameter (e.g., "mode").
             wp_send_json_error(['message' => sprintf(__('No parameter for <strong>%s</strong> was found.', 'lkn-recurrency-give'), 'mode')]);
         }
 
@@ -224,7 +219,7 @@ class LknRecurrencyGive
 
         // Start between initial date
         $start_date = "{$year_param}-{$month_param}-01 00:00:00";
-        $end_date = date("Y-m-t 23:59:59", strtotime($start_date));
+        $end_date = gmdate("Y-m-t 23:59:59", strtotime($start_date));
 
         $results = $wpdb->get_results(
             $wpdb->prepare(
@@ -294,18 +289,21 @@ class LknRecurrencyGive
 
 
         // Start between next month
-        $start_next_month = date("Y-m-01 00:00:00", strtotime("+1 month", strtotime($start_date)));
-        $end_next_month = date("Y-m-t 23:59:59", strtotime($start_next_month));
+        $start_next_month = gmdate("Y-m-01 00:00:00", strtotime("+1 month", strtotime($start_date)));
+        $end_next_month = gmdate("Y-m-t 23:59:59", strtotime($start_next_month));
 
-        $query = $wpdb->prepare(
-            "SELECT SUM(recurring_amount) as total_amount
-            FROM {$wpdb->prefix}give_subscriptions
-            WHERE expiration BETWEEN %s AND %s",
-            $start_next_month,
-            $end_next_month
+
+        $result_month_amount = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT SUM(recurring_amount) as total_amount
+                FROM {$wpdb->prefix}give_subscriptions
+                WHERE (expiration BETWEEN %s AND %s OR created BETWEEN %s AND %s)",
+                $start_next_month,
+                $end_next_month,
+                $start_next_month,
+                $end_next_month
+            )
         );
-
-        $result_month_amount = $wpdb->get_var($query);
         $total_month_amount = number_format($result_month_amount, 2);
 
 
@@ -313,15 +311,15 @@ class LknRecurrencyGive
         $start_year = "{$year_param}-01-01 00:00:00";
         $end_year = "{$year_param}-12-31 23:59:59";
 
-        $query = $wpdb->prepare(
-            "SELECT SUM(recurring_amount) as total_amount
-            FROM {$wpdb->prefix}give_subscriptions
-            WHERE created BETWEEN %s AND %s",
-            $start_year,
-            $end_year
+        $result_annual_amount = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT SUM(recurring_amount) as total_amount
+                FROM {$wpdb->prefix}give_subscriptions
+                WHERE created BETWEEN %s AND %s",
+                $start_year,
+                $end_year
+            )
         );
-
-        $result_annual_amount = $wpdb->get_var($query);
         $total_annual_amount = number_format($result_annual_amount, 2);
 
         // Process the results

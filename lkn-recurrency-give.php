@@ -13,7 +13,7 @@
  * @package           LknRecurrencyGive
  *
  * @wordpress-plugin
- * Plugin Name:       Link  Nacional GiveWP Recurrency
+ * Plugin Name:       Link Nacional GiveWP Recurrency
  * Plugin URI:        https://www.linknacional.com.br/wordpress/givewp/
  * Description:       Plugin created to list and retrieve information about the list of recurring donors in GiveWP.
  * Version:           1.0.0

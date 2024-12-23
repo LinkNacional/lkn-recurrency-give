@@ -4,11 +4,12 @@
   $(document).ready(function () {
     const apiUrlBase = lknRecurrencyVars.apiUrlBase
     let chartInstance = null
+    let topFiveDonorsChartIntance = null
 
     function getTab() {
       // Cria o botão e o adiciona à navegação
       const customButton = $('<button>', {
-        text: 'Recurrency',
+        text: lknRecurrencyTexts.recurrency,
         class: 'nav-tab',
         disabled: true,
         css: {
@@ -38,18 +39,43 @@
           customButton.on('click', function () {
             const buttonHtml = `
               <button
-                  title="General Review"
+                  title="${lknRecurrencyTexts.reviewButtonTitle}"
                   id="lkn-review-button"
               >
-                  <p>General Review</p>
+                  <p>${lknRecurrencyTexts.reviewButtonText}</p>
                   <img
                       src="${lknRecurrencyVars.urlWebsite}Includes/assets/icons/review.svg"
-                      alt="Review icon"
+                      alt="${lknRecurrencyTexts.reviewIconAlt}"
                   >
               </button>
             `
 
-            $('.givewp-filters').css('justify-content', 'flex-end').empty().append(buttonHtml)
+            const toggleButtonHtml = $('<button>', {
+              id: 'toggleMenuButton',
+              css: {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '30px',
+                width: '30px',
+                borderRadius: '4px',
+                border: '1px solid #343434',
+                cursor: 'pointer'
+              },
+              title: 'Menu'
+            }).append($('<img>', {
+              src: `${lknRecurrencyVars.urlWebsite}Includes/assets/icons/menu.svg`,
+              alt: 'Review icon',
+              css: {
+                height: '20px',
+                width: '20px'
+              }
+            }))
+
+            $('.givewp-filters').css('justify-content', 'flex-end').css('gap', '10px').empty()
+            $('.givewp-filters').append(buttonHtml)
+            $('.givewp-filters').append(toggleButtonHtml)
+            createToggleMenu()
 
             $(this).prop('disabled', true).css({
               cursor: 'not-allowed',
@@ -102,15 +128,11 @@
           })
         },
         error: function (error) {
-          console.log('Erro ao obter o conteúdo:', error.responseJSON.message || error)
-
           // Cria a nova div de erro, caso não exista
-          const errorDiv = $('<div>', {
-            class: 'lkn-error-message' // Classe para estilização
-          })
+          const errorDiv = $('<div>')
 
           // Adiciona a mensagem de erro dentro de um <p> dentro da div
-          const errorMessage = $('<p>').text(error.responseJSON.message || error)
+          const errorMessage = $('<p>').text(error.responseJSON?.message || error.statusText)
           errorDiv.append(errorMessage)
 
           // Insere a div de erro antes do givewp-grid
@@ -165,14 +187,35 @@
       const selectedCurrency = currencySelect.val()
       const selectedMode = modeSelect.val()
 
-      $.getJSON(`${apiUrlBase}&month=${selectedMonth}&year=${selectedYear}&currency=${selectedCurrency}&mode=${selectedMode}`)
+      $.getJSON(`${lknRecurrencyVars.apiUrlBase}&month=${selectedMonth}&year=${selectedYear}&currency=${selectedCurrency}&mode=${selectedMode}&nonce=${lknRecurrencyVars.nonce}`)
         .done(function (responseData) {
           $('#recurrencyChart').show()
-          $('#lkn-error-message').hide()
+          $('#top-five-donations-chart').show()
+
+          $('.lkn-error-message').hide()
 
           if (!responseData.success) {
             $('#recurrencyChart').hide()
-            $('#lkn-error-message').show().html(responseData.data.message || lknRecurrencyTexts.error_message)
+            $('#top-five-donations-chart').hide()
+            $('.lkn-error-message').show().html(responseData.data.message || lknRecurrencyTexts.error_message)
+
+            $('#lkn-table tbody').empty()
+            $('#lkn-top-last-donations-list').empty()
+
+            const selectedCurrency = currencySelect.val()
+            const formatTotal = formatCurrency(selectedCurrency)
+            const monthlyValue = $('#lkn-value')
+            const nextMonthValue = $('#lkn-value-review-monthly')
+            const annualValue = $('#lkn-value-review-yearly')
+
+            const formatTotalMonthly = `<p>${formatTotal.format(0)}</p>`
+            monthlyValue.html(formatTotalMonthly)
+
+            const formatNextMonthTotal = `<p>${formatTotal.format(0)}</p>`
+            nextMonthValue.html(formatNextMonthTotal)
+
+            const formatAnnualTotal = `<p> ${formatTotal.format(0)}</p>`
+            annualValue.html(formatAnnualTotal)
             return
           }
 
@@ -193,7 +236,6 @@
           const annualValue = $('#lkn-value-review-yearly')
 
           if (data) {
-            console.log(data)
             modalSetting(responseData)
             populateTable(responseData)
             renderTopFiveDonorsChart(responseData)
@@ -239,6 +281,19 @@
             groupedDonations = Object.values(dailyDonationTotals)
             labels = dateLabels
           } else {
+            $('#recurrencyChart').hide()
+            $('#top-five-donations-chart').hide()
+            $('.lkn-error-message').show().html(responseData.data.message || lknRecurrencyTexts.error_message)
+
+            $('#lkn-table tbody').empty()
+            $('#lkn-top-last-donations-list').empty()
+
+            const selectedCurrency = currencySelect.val()
+            const formatTotal = formatCurrency(selectedCurrency)
+            const monthlyValue = $('#lkn-value')
+            const nextMonthValue = $('#lkn-value-review-monthly')
+            const annualValue = $('#lkn-value-review-yearly')
+
             const formatTotalMonthly = `<p>${formatTotal.format(0)}</p>`
             monthlyValue.html(formatTotalMonthly)
 
@@ -267,7 +322,25 @@
         })
         .fail(function (error) {
           $('#recurrencyChart').hide()
-          $('#lkn-error-message').show().text(error.message || lknRecurrencyTexts.error_message)
+          $('#top-five-donations-chart').hide()
+          $('.lkn-error-message').show().text(error.message || lknRecurrencyTexts.error_message)
+
+          $('#lkn-table tbody').empty()
+          $('#lkn-top-last-donations-list').empty()
+
+          const formatTotal = formatCurrency(selectedCurrency)
+          const monthlyValue = $('#lkn-value')
+          const nextMonthValue = $('#lkn-value-review-monthly')
+          const annualValue = $('#lkn-value-review-yearly')
+
+          const formatTotalMonthly = `<p>${formatTotal.format(0)}</p>`
+          monthlyValue.html(formatTotalMonthly)
+
+          const formatNextMonthTotal = `<p>${formatTotal.format(0)}</p>`
+          nextMonthValue.html(formatNextMonthTotal)
+
+          const formatAnnualTotal = `<p> ${formatTotal.format(0)}</p>`
+          annualValue.html(formatAnnualTotal)
         })
         .always(function () {
           hideLoading() // Oculta o loading
@@ -294,14 +367,14 @@
           datasets: [{
             label: lknRecurrencyTexts.total_donations,
             data,
-            borderColor: 'rgba(52, 59, 69, 1)',
-            backgroundColor: 'rgba(211, 216, 0, 0.2)',
+            borderColor: 'rgba(122, 208, 58, 1)',
+            backgroundColor: 'rgba(122, 208, 58, 0.2)',
             fill: true,
             tension: 0.4,
-            pointBackgroundColor: 'rgba(52, 59, 69, 1)',
-            pointBorderColor: 'rgba(52, 59, 69, 1)',
-            pointRadius: 6,
-            pointHoverRadius: 8
+            pointBackgroundColor: 'rgba(100, 172, 45, 1)',
+            pointBorderColor: 'rgba(100, 172, 45, 1)',
+            pointRadius: 4,
+            pointHoverRadius: 6
           }]
         },
         options: {
@@ -383,6 +456,7 @@
       if (donationsByDay.length === 0) {
         content = `<strong>${lknRecurrencyTexts.no_data_day}</strong>`
       } else {
+        content += '<div class="lkn-review-data">'
         content += `<h4>${lknRecurrencyTexts.day_label}: ${customDay}</h4><ul>`
 
         donationsByDay.forEach((donation, index, array) => {
@@ -404,7 +478,7 @@
           }
         })
 
-        content += '</ul>'
+        content += '</ul></div>'
       }
 
       modalContent.html(content)
@@ -437,9 +511,10 @@
           // Adicionar o cabeçalho com a data agrupada
           content += `<h3>${lknRecurrencyTexts.date_label}: ${responseData.data.date}</h3>`
 
+          let dayIndex = 0
           // Loop pelos dias e exibição dos dados
           for (const day in donationsByDay) {
-            content += '<div class="lkn-review-data">'
+            content += `<div class="lkn-review-data" style="${dayIndex > 0 ? 'margin-top: 20px' : ''}">`
             content += `<h4>${lknRecurrencyTexts.day_label}: ${day}</h4><ul>`
             donationsByDay[day].forEach((donation, index, array) => {
               content += `
@@ -460,6 +535,7 @@
               }
             })
             content += '</ul></div>'
+            dayIndex += 1
           }
         } else {
           content = `<strong>${lknRecurrencyTexts.no_data}</strong>`
@@ -574,26 +650,38 @@
       const labels = topFiveDonations.map(donation => `${capitalizeName(donation.billing_first_name)} ${capitalizeName(donation.billing_last_name)}`)
       const data = topFiveDonations.map(donation => parseFloat(donation.recurring_amount))
 
+      if (topFiveDonorsChartIntance) {
+        topFiveDonorsChartIntance.destroy()
+      }
+
       const ctx = document.getElementById('top-five-donations-chart').getContext('2d')
-      const chart = new Chart(ctx, {
+      topFiveDonorsChartIntance = new LknChart(ctx, {
         type: 'doughnut',
         data: {
           labels,
-          datasets: [{
-            data,
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
-            hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
-          }]
+          datasets: [
+            {
+              data,
+              backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+              hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+            }
+          ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          legend: {
-            position: 'top'
-          },
-          title: {
-            display: false,
-            text: 'Top 5 Donors'
+          plugins: {
+            legend: {
+              position: 'top'
+            },
+            tooltip: {
+              callbacks: {
+                label: function (tooltipItem) {
+                  const value = tooltipItem.raw
+                  return formatTotal.format(value)
+                }
+              }
+            }
           },
           layout: {
             padding: {
@@ -602,30 +690,6 @@
               top: 10,
               bottom: 10
             }
-          },
-          tooltips: {
-            callbacks: {
-              label: function (tooltipItem, data) {
-                const value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]
-                return formatTotal.format(value)
-              }
-            }
-          },
-          scales: {
-            xAxes: [{
-              display: false,
-              ticks: {
-                max: 400,
-                min: 0
-              }
-            }],
-            yAxes: [{
-              display: false,
-              ticks: {
-                max: 400,
-                min: 0
-              }
-            }]
           }
         }
       })
@@ -640,7 +704,7 @@
     }
 
     function renderLastFiveDonationsList(responseData) {
-      const donations = responseData.data.donations.slice(-5).reverse() // Get the last 5 donations and reverse the order
+      const donations = responseData.data.donations.slice(-5).reverse()
       const listContainer = document.getElementById('lkn-top-last-donations-list')
       listContainer.innerHTML = '' // Clear existing content
 
@@ -662,6 +726,142 @@
           `
 
         listContainer.appendChild(listItem)
+      })
+    }
+
+    function createToggleMenu() {
+      const $menu = $('<div>', {
+        id: 'toggleMenu',
+        css: {
+          position: 'fixed',
+          right: '0',
+          top: '0',
+          height: '100%',
+          width: '0',
+          overflow: 'hidden',
+          borderLeft: '1px solid #ccc',
+          background: '#fff',
+          boxShadow: '-2px 0 5px rgba(0,0,0,0.5)',
+          zIndex: 9999999,
+          transition: 'padding 0.3s'
+        }
+      })
+
+      const $closeButton = $('<button>', {
+        id: 'closeMenuButton',
+        text: 'X',
+        css: {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '30px',
+          height: '30px',
+          border: 'none',
+          borderRadius: '100%',
+          backgroundColor: '#fb6b6b',
+          fontWeight: 'bold',
+          color: '#fff',
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          cursor: 'pointer'
+        }
+      })
+
+      const $selectContainer = $('<div>', {
+        css: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: '100%',
+          gap: '10px',
+          marginTop: '50px'
+        }
+      })
+
+      // Adiciona os selects
+      const currentDate = new Date()
+      const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0')
+      const currentYear = currentDate.getFullYear()
+
+      const $select1 = $('<div>', { class: 'lkn-select-input' }).append(`
+        <label for="month-select">${lknRecurrencyTexts.month_label}</label>
+        <select id="month-select">
+          <option value="01" ${currentMonth === '01' ? 'selected' : ''}>${lknRecurrencyTexts.january}</option>
+          <option value="02" ${currentMonth === '02' ? 'selected' : ''}>${lknRecurrencyTexts.february}</option>
+          <option value="03" ${currentMonth === '03' ? 'selected' : ''}>${lknRecurrencyTexts.march}</option>
+          <option value="04" ${currentMonth === '04' ? 'selected' : ''}>${lknRecurrencyTexts.april}</option>
+          <option value="05" ${currentMonth === '05' ? 'selected' : ''}>${lknRecurrencyTexts.may}</option>
+          <option value="06" ${currentMonth === '06' ? 'selected' : ''}>${lknRecurrencyTexts.june}</option>
+          <option value="07" ${currentMonth === '07' ? 'selected' : ''}>${lknRecurrencyTexts.july}</option>
+          <option value="08" ${currentMonth === '08' ? 'selected' : ''}>${lknRecurrencyTexts.august}</option>
+          <option value="09" ${currentMonth === '09' ? 'selected' : ''}>${lknRecurrencyTexts.september}</option>
+          <option value="10" ${currentMonth === '10' ? 'selected' : ''}>${lknRecurrencyTexts.october}</option>
+          <option value="11" ${currentMonth === '11' ? 'selected' : ''}>${lknRecurrencyTexts.november}</option>
+          <option value="12" ${currentMonth === '12' ? 'selected' : ''}>${lknRecurrencyTexts.december}</option>
+        </select>
+      `)
+
+      const $select2 = $('<div>', { class: 'lkn-select-input' }).append(`
+        <label for="year-select">${lknRecurrencyTexts.year_label}</label>
+        <select id="year-select">
+          ${Array.from({ length: 11 }, (_, i) => {
+        const year = 2020 + i
+        return `<option value="${year}" ${year === currentYear ? 'selected' : ''}>${year}</option>`
+      }).join('')}
+        </select>
+      `)
+
+      const $select3 = $('<div>', { class: 'lkn-select-input' }).append(`
+        <label for="currency-select">${lknRecurrencyTexts.currency_label}</label>
+        <select id="currency-select">
+          <option value="BRL">${lknRecurrencyTexts.currency_brl}</option>
+        </select>
+      `)
+
+      const $select4 = $('<div>', { class: 'lkn-select-input' }).append(`
+        <label for="mode-select">${lknRecurrencyTexts.payment_mode_label}</label>
+        <select id="mode-select">
+          <option value="test">${lknRecurrencyTexts.payment_mode_test}</option>
+          <option value="production">${lknRecurrencyTexts.payment_mode_production}</option>
+        </select>
+      `)
+
+      $selectContainer.append($select1, $select2, $select3, $select4)
+      $menu.append($closeButton, $selectContainer)
+      $('body').append($menu)
+
+      // Botão para abrir o menu com animação
+      $('#toggleMenuButton').on('click', function () {
+        $menu.animate(
+          {
+            width: '300px'
+          },
+          400
+        )
+      })
+
+      // Botão para fechar o menu com animação
+      $closeButton.on('click', function () {
+        $menu.animate(
+          {
+            width: '0'
+          },
+          400,
+          function () {
+            $menu.css('overflow', 'hidden')
+          }
+        )
+      })
+
+      // Fecha o menu ao clicar fora dele
+      $(document).on('click', function (event) {
+        if (!$(event.target).closest('#toggleMenu, #toggleMenuButton').length) {
+          if (parseInt($menu.css('width'), 10) > 0) {
+            $menu.animate({ width: '0' }, 400, function () {
+              $menu.css('overflow', 'hidden')
+            })
+          }
+        }
       })
     }
 

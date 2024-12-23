@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lkn-recurrency-give\n"
 "Report-Msgid-Bugs-To: Translator Name <translations@example.com>\n"
-"POT-Creation-Date: 2024-12-13 09:51-0300\n"
+"POT-Creation-Date: 2024-12-23 16:24-0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: Your Team <translations@example.com>\n"
@@ -28,140 +28,75 @@ msgstr ""
 msgid "loading animation"
 msgstr "animação de carregamento"
 
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:15
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:35
-msgid "Link Nacional Page"
-msgstr "Página da Link Nacional"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:23
-msgid "Link Nacional Logo"
-msgstr "Logo da Link Nacional"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:28
-msgid "Link Nacional"
-msgstr "Link Nacional"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:29
-msgid "Lkn Recurrency Give"
-msgstr "Lkn Recurrency Give"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:40
-msgid "Internet icon"
-msgstr "Ícone de internet"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:42
-msgid "VISIT US"
-msgstr "VISITE-NOS"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:50
-msgid "Select date"
-msgstr "Selecione a data"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:54
-msgid "Select month:"
-msgstr "Selecione o mês:"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:58
-msgid "January"
-msgstr "Janeiro"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:61
-msgid "February"
-msgstr "Favereiro"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:64
-msgid "March"
-msgstr "Março"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:67
-msgid "April"
-msgstr "Abril"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:70
-msgid "May"
-msgstr "Maio"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:73
-msgid "June"
-msgstr "Junho"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:76
-msgid "July"
-msgstr "Julho"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:79
-msgid "August"
-msgstr "Agosto"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:82
-msgid "September"
-msgstr "Setembro"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:85
-msgid "October"
-msgstr "Outubro"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:88
-msgid "November"
-msgstr "Novembro"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:91
-msgid "December"
-msgstr "Dezembro"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:96
-msgid "Select year:"
-msgstr "Selecione o ano:"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:109
-msgid "Select currency:"
-msgstr "Selecione a moeda:"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:116
-msgid "Select payment mode:"
-msgstr "Selecione o modo de pagamento:"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:118
-msgid "Test"
-msgstr "Teste"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:119
-msgid "Production"
-msgstr "Produção"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:126
-msgid "Total amount (Monthly)"
-msgstr "Valor total (Mensal)"
-
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:128
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:159
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:32
 msgid "General Review"
 msgstr "Revisão Geral"
 
-#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:133
-msgid "Review icon"
-msgstr "Ícone de revisão"
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:44
+msgid "Total amount (Monthly)"
+msgstr "Valor total (Mensal)"
 
-#: Includes/LknRecurrencyGive.php:178 Includes/LknRecurrencyGive.php:183
-#: Includes/LknRecurrencyGive.php:188 Includes/LknRecurrencyGive.php:193
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:57
+#: Includes/LknRecurrencyGiveHelper.php:26
+msgid "Expected amount for next month"
+msgstr "Quantidade esperada para o próximo mês"
+
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:70
+msgid "Expected amount for the year"
+msgstr "Quantidade esperada para o ano"
+
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:84
+msgid "Recurring Donations Table"
+msgstr "Tabela de Doações Recorrentes"
+
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:91
+msgid "Creation Date"
+msgstr "Data de Criação"
+
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:93
+msgid "Expiration Date"
+msgstr "Data de Expiração"
+
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:95
+msgid "Name"
+msgstr "Nome"
+
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:97
+msgid "Value"
+msgstr "Valor"
+
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:99
+msgid "User ID"
+msgstr "ID do usuário"
+
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:116
+msgid "Top 5 Donors"
+msgstr "Top 5 Doadores"
+
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:132
+msgid "Last 5 Donations"
+msgstr "Últimas 5 Doações"
+
+#: Admin/partials/LknRecurrencyGiveGraphDisplay.php:146
+#, php-format
+msgid "Report generated by the %1$sLink Nacional Plugin%2$s"
+msgstr "Relatório gerado pelo %1$sPlugin Link Nacional%2$s"
+
+#: Includes/LknRecurrencyGive.php:175
+msgid "Nonce verification failed."
+msgstr "Verificação de nonce falhou."
+
+#: Includes/LknRecurrencyGive.php:188 Includes/LknRecurrencyGive.php:194
+#: Includes/LknRecurrencyGive.php:200 Includes/LknRecurrencyGive.php:206
 #, php-format
 msgid "No parameter for <strong>%s</strong> was found."
 msgstr "Nenhum parâmetro para <strong>%s</strong> foi encontrado."
 
-#: Includes/LknRecurrencyGive.php:207
+#: Includes/LknRecurrencyGive.php:217
 msgid "Permission denied."
-msgstr "Permissão negada"
+msgstr "Permissão negada."
 
-#: Includes/LknRecurrencyGive.php:297 Includes/LknRecurrencyGive.php:298
-#: Includes/LknRecurrencyGive.php:299 Includes/LknRecurrencyGive.php:300
-#: Includes/LknRecurrencyGive.php:301 Includes/LknRecurrencyGive.php:302
-#: Includes/LknRecurrencyGive.php:303 Includes/LknRecurrencyGive.php:304
-#: Includes/LknRecurrencyGive.php:305 Includes/LknRecurrencyGive.php:306
-#: Includes/LknRecurrencyGive.php:307
-msgid "N/A"
-msgstr "N/D"
-
-#: Includes/LknRecurrencyGive.php:326
+#: Includes/LknRecurrencyGive.php:340
 msgid "No donation ID found."
 msgstr "Nenhum ID de doação encontrado."
 
@@ -174,56 +109,176 @@ msgid "Dates"
 msgstr "Datas"
 
 #: Includes/LknRecurrencyGiveHelper.php:12
+msgid "Day"
+msgstr "Dia"
+
+#: Includes/LknRecurrencyGiveHelper.php:13
 msgid "Number of donations:"
 msgstr "Número de doações:"
 
-#: Includes/LknRecurrencyGiveHelper.php:13
+#: Includes/LknRecurrencyGiveHelper.php:14
 msgid "No data for the selected month."
 msgstr "Nenhum dado para o mês selecionado."
 
-#: Includes/LknRecurrencyGiveHelper.php:14
+#: Includes/LknRecurrencyGiveHelper.php:15
 msgid "No data for the selected day."
 msgstr "Nenhum dado para o dia selecionado."
 
-#: Includes/LknRecurrencyGiveHelper.php:15
+#: Includes/LknRecurrencyGiveHelper.php:16
 msgid "An error occurred. Please try again."
 msgstr "Ocorreu um erro. Por favor, tente novamente."
 
-#: Includes/LknRecurrencyGiveHelper.php:16
+#: Includes/LknRecurrencyGiveHelper.php:17
 msgid "Donation ID:"
 msgstr "ID da doação:"
 
-#: Includes/LknRecurrencyGiveHelper.php:17
-msgid "User ID:"
-msgstr "ID do usuário"
-
 #: Includes/LknRecurrencyGiveHelper.php:18
+msgid "User ID:"
+msgstr "ID do usuário:"
+
+#: Includes/LknRecurrencyGiveHelper.php:19
 msgid "Value:"
 msgstr "Valor:"
 
-#: Includes/LknRecurrencyGiveHelper.php:19
+#: Includes/LknRecurrencyGiveHelper.php:20
 msgid "Currency:"
 msgstr "Moeda:"
 
-#: Includes/LknRecurrencyGiveHelper.php:20
+#: Includes/LknRecurrencyGiveHelper.php:21
 msgid "Name:"
 msgstr "Nome:"
 
-#: Includes/LknRecurrencyGiveHelper.php:21
+#: Includes/LknRecurrencyGiveHelper.php:22
 msgid "Email:"
 msgstr "E-mail:"
 
-#: Includes/LknRecurrencyGiveHelper.php:22
+#: Includes/LknRecurrencyGiveHelper.php:23
 msgid "Payment Mode:"
 msgstr "Modo de pagamento:"
 
-#: Includes/LknRecurrencyGiveHelper.php:23
-msgid "Completion Date:"
-msgstr "Data de conclusão:"
-
 #: Includes/LknRecurrencyGiveHelper.php:24
+msgid "Creation Date:"
+msgstr "Data de Criação:"
+
+#: Includes/LknRecurrencyGiveHelper.php:25
 msgid "Expiration:"
 msgstr "Expiração:"
+
+#: Includes/LknRecurrencyGiveHelper.php:27
+msgid "Recurrency"
+msgstr "Recorrência"
+
+#: Includes/LknRecurrencyGiveHelper.php:28
+msgid "Select month:"
+msgstr "Selecione o mês:"
+
+#: Includes/LknRecurrencyGiveHelper.php:29
+msgid "Select year:"
+msgstr "Selecione o ano:"
+
+#: Includes/LknRecurrencyGiveHelper.php:30
+msgid "Select currency:"
+msgstr "Selecione a moeda:"
+
+#: Includes/LknRecurrencyGiveHelper.php:31
+msgid "Select payment mode:"
+msgstr "Selecione o modo de pagamento:"
+
+#: Includes/LknRecurrencyGiveHelper.php:32
+msgid "January"
+msgstr "Janeiro"
+
+#: Includes/LknRecurrencyGiveHelper.php:33
+msgid "February"
+msgstr "Favereiro"
+
+#: Includes/LknRecurrencyGiveHelper.php:34
+msgid "March"
+msgstr "Março"
+
+#: Includes/LknRecurrencyGiveHelper.php:35
+msgid "April"
+msgstr "Abril"
+
+#: Includes/LknRecurrencyGiveHelper.php:36
+msgid "May"
+msgstr "Maio"
+
+#: Includes/LknRecurrencyGiveHelper.php:37
+msgid "June"
+msgstr "Junho"
+
+#: Includes/LknRecurrencyGiveHelper.php:38
+msgid "July"
+msgstr "Julho"
+
+#: Includes/LknRecurrencyGiveHelper.php:39
+msgid "August"
+msgstr "Agosto"
+
+#: Includes/LknRecurrencyGiveHelper.php:40
+msgid "September"
+msgstr "Setembro"
+
+#: Includes/LknRecurrencyGiveHelper.php:41
+msgid "October"
+msgstr "Outubro"
+
+#: Includes/LknRecurrencyGiveHelper.php:42
+msgid "November"
+msgstr "Novembro"
+
+#: Includes/LknRecurrencyGiveHelper.php:43
+msgid "December"
+msgstr "Dezembro"
+
+#: Includes/LknRecurrencyGiveHelper.php:44
+msgid "BRL"
+msgstr "BRL"
+
+#: Includes/LknRecurrencyGiveHelper.php:45
+msgid "Test"
+msgstr "Teste"
+
+#: Includes/LknRecurrencyGiveHelper.php:46
+msgid "Production"
+msgstr "Produção"
+
+#: Includes/LknRecurrencyGiveHelper.php:47
+#: Includes/LknRecurrencyGiveHelper.php:48
+msgid "Review"
+msgstr "Revisão"
+
+#: Includes/LknRecurrencyGiveHelper.php:49
+msgid "Review icon"
+msgstr "Ícone de revisão"
+
+#~ msgid "Cash icon"
+#~ msgstr "Ícone de Dinheiro"
+
+#~ msgid "N/A"
+#~ msgstr "N/D"
+
+#~ msgid "Link Nacional Page"
+#~ msgstr "Página da Link Nacional"
+
+#~ msgid "Link Nacional Logo"
+#~ msgstr "Logo da Link Nacional"
+
+#~ msgid "Link Nacional"
+#~ msgstr "Link Nacional"
+
+#~ msgid "Lkn Recurrency Give"
+#~ msgstr "Lkn Recurrency Give"
+
+#~ msgid "Internet icon"
+#~ msgstr "Ícone de internet"
+
+#~ msgid "VISIT US"
+#~ msgstr "VISITE-NOS"
+
+#~ msgid "Select date"
+#~ msgstr "Selecione a data"
 
 #~ msgid "General review"
 #~ msgstr "Revisão geral"
