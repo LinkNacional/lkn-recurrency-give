@@ -2,7 +2,6 @@
   'use strict'
 
   $(document).ready(function () {
-    const apiUrlBase = lknRecurrencyVars.apiUrlBase
     let chartInstance = null
     let topFiveDonorsChartIntance = null
 
@@ -201,6 +200,8 @@
 
             $('#lkn-table tbody').empty()
             $('#lkn-top-last-donations-list').empty()
+            $('#lkn-review-button').off('click')
+            $('#lkn-modal-content').empty()
 
             const selectedCurrency = currencySelect.val()
             const formatTotal = formatCurrency(selectedCurrency)
@@ -287,6 +288,8 @@
 
             $('#lkn-table tbody').empty()
             $('#lkn-top-last-donations-list').empty()
+            $('#lkn-review-button').off('click')
+            $('#lkn-modal-content').empty()
 
             const selectedCurrency = currencySelect.val()
             const formatTotal = formatCurrency(selectedCurrency)
@@ -327,6 +330,8 @@
 
           $('#lkn-table tbody').empty()
           $('#lkn-top-last-donations-list').empty()
+          $('#lkn-review-button').off('click')
+          $('#lkn-modal-content').empty()
 
           const formatTotal = formatCurrency(selectedCurrency)
           const monthlyValue = $('#lkn-value')
@@ -730,7 +735,7 @@
     }
 
     function createToggleMenu() {
-      const $menu = $('<div>', {
+      const menu = $('<div>', {
         id: 'toggleMenu',
         css: {
           position: 'fixed',
@@ -747,7 +752,7 @@
         }
       })
 
-      const $closeButton = $('<button>', {
+      const closeButton = $('<button>', {
         id: 'closeMenuButton',
         text: 'X',
         css: {
@@ -783,7 +788,7 @@
       const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0')
       const currentYear = currentDate.getFullYear()
 
-      const $select1 = $('<div>', { class: 'lkn-select-input' }).append(`
+      const select1 = $('<div>', { class: 'lkn-select-input' }).append(`
         <label for="month-select">${lknRecurrencyTexts.month_label}</label>
         <select id="month-select">
           <option value="01" ${currentMonth === '01' ? 'selected' : ''}>${lknRecurrencyTexts.january}</option>
@@ -801,7 +806,7 @@
         </select>
       `)
 
-      const $select2 = $('<div>', { class: 'lkn-select-input' }).append(`
+      const select2 = $('<div>', { class: 'lkn-select-input' }).append(`
         <label for="year-select">${lknRecurrencyTexts.year_label}</label>
         <select id="year-select">
           ${Array.from({ length: 11 }, (_, i) => {
@@ -811,14 +816,14 @@
         </select>
       `)
 
-      const $select3 = $('<div>', { class: 'lkn-select-input' }).append(`
+      const select3 = $('<div>', { class: 'lkn-select-input' }).append(`
         <label for="currency-select">${lknRecurrencyTexts.currency_label}</label>
         <select id="currency-select">
           <option value="BRL">${lknRecurrencyTexts.currency_brl}</option>
         </select>
       `)
 
-      const $select4 = $('<div>', { class: 'lkn-select-input' }).append(`
+      const select4 = $('<div>', { class: 'lkn-select-input' }).append(`
         <label for="mode-select">${lknRecurrencyTexts.payment_mode_label}</label>
         <select id="mode-select">
           <option value="test">${lknRecurrencyTexts.payment_mode_test}</option>
@@ -826,13 +831,13 @@
         </select>
       `)
 
-      $selectContainer.append($select1, $select2, $select3, $select4)
-      $menu.append($closeButton, $selectContainer)
-      $('body').append($menu)
+      $selectContainer.append(select1, select2, select3, select4)
+      menu.append(closeButton, $selectContainer)
+      $('body').append(menu)
 
       // Botão para abrir o menu com animação
       $('#toggleMenuButton').on('click', function () {
-        $menu.animate(
+        menu.animate(
           {
             width: '300px'
           },
@@ -841,14 +846,14 @@
       })
 
       // Botão para fechar o menu com animação
-      $closeButton.on('click', function () {
-        $menu.animate(
+      closeButton.on('click', function () {
+        menu.animate(
           {
             width: '0'
           },
           400,
           function () {
-            $menu.css('overflow', 'hidden')
+            menu.css('overflow', 'hidden')
           }
         )
       })
@@ -856,9 +861,9 @@
       // Fecha o menu ao clicar fora dele
       $(document).on('click', function (event) {
         if (!$(event.target).closest('#toggleMenu, #toggleMenuButton').length) {
-          if (parseInt($menu.css('width'), 10) > 0) {
-            $menu.animate({ width: '0' }, 400, function () {
-              $menu.css('overflow', 'hidden')
+          if (parseInt(menu.css('width'), 10) > 0) {
+            menu.animate({ width: '0' }, 400, function () {
+              menu.css('overflow', 'hidden')
             })
           }
         }

@@ -2,11 +2,9 @@
 
 **Contribuidores:** Link Nacional
 
-**Link para Doações:** [Link Nacional](https://linknacional.com.br/)
+**Site:** [Link Nacional](https://linknacional.com.br/)
 
 **Tags:** recorrência, give, giveWP, doações, dashboard
-
-**Requer pelo menos:** 3.0.1
 
 **Testado até:** 6.7
 
