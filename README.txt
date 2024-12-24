@@ -1,6 +1,6 @@
 === Link Nacional GiveWP Recurrency ===
 Contributors: Link Nacional
-Website: https://linknacional.com.br/
+Website: https://www.linknacional.com.br/
 Tags: recurrency, give, giveWP, donations, dashboard
 Tested up to: 6.7
 Stable tag: 1.0.0
