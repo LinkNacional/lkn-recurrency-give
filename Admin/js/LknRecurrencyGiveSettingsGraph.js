@@ -109,7 +109,6 @@
             modeSelect.off('change', fetchDataAndRenderChart)
 
             // Event listeners para os selects
-            console.log(2)
             monthSelect.on('change', function () {
               fetchDataAndRenderChart(monthSelect, yearSelect, currencySelect, modeSelect)
             })
@@ -128,7 +127,6 @@
           })
         },
         error: function (error) {
-          console.log(error)
           // Cria a nova div de erro, caso não exista
           const errorDiv = $('<div>')
 
@@ -187,10 +185,8 @@
       const selectedYear = yearSelect.val()
       const selectedCurrency = currencySelect.val()
       const selectedMode = modeSelect.val()
-      console.log(2)
       $.getJSON(`${lknRecurrencyVars.apiUrlBase}&month=${selectedMonth}&year=${selectedYear}&currency=${selectedCurrency}&mode=${selectedMode}&nonce=${lknRecurrencyVars.nonce}`)
         .done(function (responseData) {
-          console.log(responseData)
           $('#recurrencyChart').show()
           $('#top-five-donations-chart').show()
 
@@ -327,7 +323,6 @@
           updateChart(daysOfMonth, numberOfDonationsPerDay, responseData)
         })
         .fail(function (error) {
-          console.log(error)
           $('#recurrencyChart').hide()
           $('#top-five-donations-chart').hide()
           $('.lkn-error-message').show().text(error.message || lknRecurrencyTexts.error_message)
@@ -654,7 +649,26 @@
       const formatTotal = formatCurrency(selectedCurrency)
 
       // Sort donations by recurring_amount in descending order and take the top 5
-      const topFiveDonations = donations.sort((a, b) => parseFloat(b.recurring_amount) - parseFloat(a.recurring_amount)).slice(0, 5)
+      const groupedDonations = donations.reduce((acc, donation) => {
+        const customerId = donation.customer_id
+        if (!acc[customerId]) {
+          acc[customerId] = {
+            ...donation,
+            recurring_amount: parseFloat(donation.recurring_amount)
+          }
+        } else {
+          acc[customerId].recurring_amount += parseFloat(donation.recurring_amount)
+        }
+        return acc
+      }, {})
+
+      // Converter o objeto agrupado de volta para um array
+      const aggregatedDonations = Object.values(groupedDonations)
+
+      // Ordenar as doações agregadas e pegar as 5 maiores
+      const topFiveDonations = aggregatedDonations
+        .sort((a, b) => b.recurring_amount - a.recurring_amount)
+        .slice(0, 5)
 
       const labels = topFiveDonations.map(donation => `${capitalizeName(donation.billing_first_name)} ${capitalizeName(donation.billing_last_name)}`)
       const data = topFiveDonations.map(donation => parseFloat(donation.recurring_amount))
@@ -713,13 +727,45 @@
     }
 
     function renderLastFiveDonationsList(responseData) {
-      const donations = responseData.data.donations.slice(-5).reverse()
+      const reversedDonations = responseData.data.donations.reverse()
+
+      // Inicializar um objeto para agrupar as doações por customer_id
+      const groupedDonations = {}
+
+      // Inicializar um contador para o número de doações únicas
+      let uniqueDonationsCount = 0
+
+      // Iterar sobre o array de doações invertido
+      for (const donation of reversedDonations) {
+        const customerId = donation.customer_id
+        if (!groupedDonations[customerId]) {
+          // Se ainda não temos 5 doações únicas, adicionar a doação ao grupo
+          if (uniqueDonationsCount < 5) {
+            groupedDonations[customerId] = {
+              ...donation,
+              recurring_amount: parseFloat(donation.recurring_amount)
+            }
+            uniqueDonationsCount++
+          } else {
+            // Se já temos 5 doações únicas, apenas acumular o valor
+            groupedDonations[customerId].recurring_amount += parseFloat(donation.recurring_amount)
+          }
+        } else {
+          // Acumular o valor da doação existente
+          groupedDonations[customerId].recurring_amount += parseFloat(donation.recurring_amount)
+        }
+      }
+
+      // Converter o objeto agrupado de volta para um array
+      const aggregatedDonations = Object.values(groupedDonations)
+      aggregatedDonations.reverse()
+
       const listContainer = document.getElementById('lkn-top-last-donations-list')
       listContainer.innerHTML = '' // Clear existing content
 
       const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
 
-      donations.forEach((donation, index) => {
+      aggregatedDonations.forEach((donation, index) => {
         const listItem = document.createElement('div')
         listItem.className = 'lkn-donation-item'
 

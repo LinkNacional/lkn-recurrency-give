@@ -271,7 +271,7 @@ class LknRecurrencyGive
                     AND subs.payment_mode = %s
                     AND meta_currency.meta_value = %s
                 GROUP BY
-                    meta_donor.donation_id
+                    subs.id
                 ",
                 $start_date,
                 $end_date,
