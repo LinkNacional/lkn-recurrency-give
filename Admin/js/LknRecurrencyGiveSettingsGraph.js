@@ -4,7 +4,6 @@
   $(document).ready(function () {
     let chartInstance = null
     let topFiveDonorsChartIntance = null
-
     function getTab() {
       // Cria o botão e o adiciona à navegação
       const customButton = $('<button>', {
@@ -24,6 +23,7 @@
       $.ajax({
         url: '/wp-json/lkn-recurrency/v1/content/',
         method: 'GET',
+        contentType: 'application/json',
         success: function (data) {
           $('.givewp-grid').before(data)
           $('.lkn-wrap').css('display', 'none')
@@ -109,6 +109,7 @@
             modeSelect.off('change', fetchDataAndRenderChart)
 
             // Event listeners para os selects
+            console.log(2)
             monthSelect.on('change', function () {
               fetchDataAndRenderChart(monthSelect, yearSelect, currencySelect, modeSelect)
             })
@@ -127,6 +128,7 @@
           })
         },
         error: function (error) {
+          console.log(error)
           // Cria a nova div de erro, caso não exista
           const errorDiv = $('<div>')
 
@@ -185,9 +187,10 @@
       const selectedYear = yearSelect.val()
       const selectedCurrency = currencySelect.val()
       const selectedMode = modeSelect.val()
-
+      console.log(2)
       $.getJSON(`${lknRecurrencyVars.apiUrlBase}&month=${selectedMonth}&year=${selectedYear}&currency=${selectedCurrency}&mode=${selectedMode}&nonce=${lknRecurrencyVars.nonce}`)
         .done(function (responseData) {
+          console.log(responseData)
           $('#recurrencyChart').show()
           $('#top-five-donations-chart').show()
 
@@ -324,6 +327,7 @@
           updateChart(daysOfMonth, numberOfDonationsPerDay, responseData)
         })
         .fail(function (error) {
+          console.log(error)
           $('#recurrencyChart').hide()
           $('#top-five-donations-chart').hide()
           $('.lkn-error-message').show().text(error.message || lknRecurrencyTexts.error_message)
