@@ -315,7 +315,9 @@ class LknRecurrencyGive
             $wpdb->prepare(
                 "SELECT SUM(recurring_amount) as total_amount
                 FROM {$wpdb->prefix}give_subscriptions
-                WHERE created BETWEEN %s AND %s",
+                WHERE (expiration BETWEEN %s AND %s OR created BETWEEN %s AND %s)",
+                $start_year,
+                $end_year,
                 $start_year,
                 $end_year
             )
