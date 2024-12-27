@@ -23,6 +23,7 @@
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       lkn-recurrency-give
  * Domain Path:       /Languages
+ * Requires Plugins:  giveWP
  */
 
 use Lkn\RecurrencyGive\Includes\LknRecurrencyGive;
