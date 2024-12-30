@@ -244,10 +244,10 @@
             const formatMonthlyTotal = `<p>${formatTotal.format(data.total.toFixed(2))}</p>`
             monthlyValue.html(formatMonthlyTotal)
 
-            const formatNextMonthTotal = `<p>${formatTotal.format(data.next_month_total.toFixed(2))}</p>`
+            const formatNextMonthTotal = `<p>${formatTotal.format(parseFloat(data.next_month_total.replace(',', '')))}</p>`
             nextMonthValue.html(formatNextMonthTotal)
 
-            const formatAnnualTotal = `<p> ${formatTotal.format(data.annual_total.toFixed(2))}</p>`
+            const formatAnnualTotal = `<p> ${formatTotal.format(parseFloat(data.annual_total.replace(',', '')))}</p>`
             annualValue.html(formatAnnualTotal)
 
             const donationSummary = data.donations.reduce(
@@ -257,7 +257,8 @@
                 const donationMonth = new Date(donationDate).getMonth() + 1
 
                 if (donationMonth !== parseInt(selectedMonth)) {
-                  donationDate = donation.expiration.split(' ')[0]
+                  const getDay = new Date(donationDate).getDate()
+                  donationDate = `${selectedYear}-${selectedMonth}-${getDay + 1}`
                 }
 
                 // Adiciona a data ao labelsArray, se não existir
@@ -470,7 +471,7 @@
                       <strong>${lknRecurrencyTexts.user_id}</strong> ${donation.customer_id} <br>
                       <strong>${lknRecurrencyTexts.value}</strong> ${formatTotal.format(donation.recurring_amount)} <br>
                       <strong>${lknRecurrencyTexts.currency}</strong> ${donation.payment_currency} <br>
-                      <strong>${lknRecurrencyTexts.name}</strong> ${donation.billing_first_name} ${donation.billing_last_name} <br>
+                      <strong>${lknRecurrencyTexts.name}</strong> ${capitalizeName(donation.billing_first_name)} ${capitalizeName(donation.billing_last_name)} <br>
                       <strong>${lknRecurrencyTexts.email}</strong> ${donation.donor_email} <br>
                       <strong>${lknRecurrencyTexts.payment_mode}</strong> ${donation.payment_mode} <br>
                       <strong>${lknRecurrencyTexts.creation_date}</strong> ${donation.created} <br>
@@ -527,7 +528,7 @@
                   <strong>${lknRecurrencyTexts.user_id}</strong> ${donation.customer_id} <br>
                   <strong>${lknRecurrencyTexts.value}</strong> ${formatTotal.format(donation.recurring_amount)} <br>
                   <strong>${lknRecurrencyTexts.currency}</strong> ${donation.payment_currency} <br>
-                  <strong>${lknRecurrencyTexts.name}</strong> ${donation.billing_first_name} ${donation.billing_last_name} <br>
+                  <strong>${lknRecurrencyTexts.name}</strong> ${capitalizeName(donation.billing_first_name)} ${capitalizeName(donation.billing_last_name)} <br>
                   <strong>${lknRecurrencyTexts.email}</strong> ${donation.donor_email} <br>
                   <strong>${lknRecurrencyTexts.payment_mode}</strong> ${donation.payment_mode} <br>
                   <strong>${lknRecurrencyTexts.creation_date}</strong> ${donation.created} <br>
@@ -622,13 +623,13 @@
                   <strong>${lknRecurrencyTexts.user_id}</strong> ${donation.customer_id} <br>
                   <strong>${lknRecurrencyTexts.value}</strong> ${formatTotal.format(donation.recurring_amount)} <br>
                   <strong>${lknRecurrencyTexts.currency}</strong> ${donation.payment_currency} <br>
-                  <strong>${lknRecurrencyTexts.name}</strong> ${donation.billing_first_name} ${donation.billing_last_name} <br>
+                  <strong>${lknRecurrencyTexts.name}</strong> ${capitalizeName(donation.billing_first_name)} ${capitalizeName(donation.billing_last_name)} <br>
                   <strong>${lknRecurrencyTexts.email}</strong> ${donation.donor_email} <br>
                   <strong>${lknRecurrencyTexts.payment_mode}</strong> ${donation.payment_mode} <br>
                   <strong>${lknRecurrencyTexts.creation_date}</strong> ${donation.created} <br>
                   <strong>${lknRecurrencyTexts.expiration}</strong> ${donation.expiration}
               </li>
-          `
+      `
 
         content += '</ul></div>'
         // Populate modal with content
@@ -729,8 +730,8 @@
     function renderLastFiveDonationsList(responseData) {
       const reversedDonations = responseData.data.donations.reverse()
 
-      // Inicializar um objeto para agrupar as doações por customer_id
-      const groupedDonations = {}
+      // Inicializar um array para agrupar as doações por customer_id
+      const groupedDonations = []
 
       // Inicializar um contador para o número de doações únicas
       let uniqueDonationsCount = 0
@@ -738,34 +739,31 @@
       // Iterar sobre o array de doações invertido
       for (const donation of reversedDonations) {
         const customerId = donation.customer_id
-        if (!groupedDonations[customerId]) {
+
+        // Verificar se já existe uma doação com o mesmo customer_id
+        const existingDonationIndex = groupedDonations.findIndex(d => d.customer_id === customerId)
+
+        if (existingDonationIndex === -1) {
           // Se ainda não temos 5 doações únicas, adicionar a doação ao grupo
           if (uniqueDonationsCount < 5) {
-            groupedDonations[customerId] = {
+            groupedDonations.push({
               ...donation,
               recurring_amount: parseFloat(donation.recurring_amount)
-            }
+            })
             uniqueDonationsCount++
-          } else {
-            // Se já temos 5 doações únicas, apenas acumular o valor
-            groupedDonations[customerId].recurring_amount += parseFloat(donation.recurring_amount)
           }
         } else {
           // Acumular o valor da doação existente
-          groupedDonations[customerId].recurring_amount += parseFloat(donation.recurring_amount)
+          groupedDonations[existingDonationIndex].recurring_amount += parseFloat(donation.recurring_amount)
         }
       }
-
-      // Converter o objeto agrupado de volta para um array
-      const aggregatedDonations = Object.values(groupedDonations)
-      aggregatedDonations.reverse()
 
       const listContainer = document.getElementById('lkn-top-last-donations-list')
       listContainer.innerHTML = '' // Clear existing content
 
       const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
 
-      aggregatedDonations.forEach((donation, index) => {
+      groupedDonations.forEach((donation, index) => {
         const listItem = document.createElement('div')
         listItem.className = 'lkn-donation-item'
 

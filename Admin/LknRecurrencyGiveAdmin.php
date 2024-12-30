@@ -148,8 +148,6 @@ class LknRecurrencyGiveAdmin
                 LknRecurrencyGiveHelper::get_texts()
             );
         }
-
-
     }
 
 }

@@ -18,12 +18,12 @@
  * Description:       Plugin created to list and retrieve information about the list of recurring donors in GiveWP.
  * Version:           1.0.0
  * Author:            Link Nacional
+ * Requires Plugins:  give
  * Author URI:        https://linknacional.com.br/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       lkn-recurrency-give
  * Domain Path:       /Languages
- * Requires Plugins:  giveWP
  */
 
 use Lkn\RecurrencyGive\Includes\LknRecurrencyGive;

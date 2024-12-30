@@ -46,7 +46,7 @@ class LknRecurrencyGiveHelper
             'payment_mode_production' => __('Production', 'lkn-recurrency-give'),
             'reviewButtonTitle' => __('Review', 'lkn-recurrency-give'),
             'reviewButtonText' => __('Review', 'lkn-recurrency-give'),
-            'reviewIconAlt' => __('Review icon', 'lkn-recurrency-give'),
+            'reviewIconAlt' => __('Review icon', 'lkn-recurrency-give')
         ];
     }
 }

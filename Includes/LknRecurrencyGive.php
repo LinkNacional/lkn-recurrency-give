@@ -4,6 +4,7 @@ namespace Lkn\RecurrencyGive\Includes;
 
 use Lkn\RecurrencyGive\Admin\LknRecurrencyGiveAdmin;
 use Lkn\RecurrencyGive\PublicView\LknRecurrencyGivePublic;
+use Give\Donations\Models\Donation;
 use WP_REST_Response;
 
 /**
@@ -221,16 +222,17 @@ class LknRecurrencyGive
         $start_date = "{$year_param}-{$month_param}-01 00:00:00";
         $end_date = gmdate("Y-m-t 23:59:59", strtotime($start_date));
 
-        $results = $wpdb->get_results(
+        $subscriptions_results = $wpdb->get_results(
             $wpdb->prepare(
                 "
-                SELECT
+                SELECT DISTINCT
                     meta_donor.donation_id,
                     meta_billing_first_name.meta_value AS billing_first_name,
                     meta_billing_last_name.meta_value AS billing_last_name,
                     meta_email.meta_value AS donor_email,
                     meta_currency.meta_value AS payment_currency,
                     meta_recurring.meta_value AS is_recurring,
+                    subs.id AS subscription_id,
                     subs.customer_id,
                     subs.frequency,
                     subs.recurring_amount,
@@ -240,41 +242,41 @@ class LknRecurrencyGive
                     subs.profile_id
                 FROM
                     {$wpdb->prefix}give_subscriptions AS subs
-                LEFT JOIN
+                INNER JOIN
                     {$wpdb->prefix}give_donationmeta AS meta_donor
-                    ON subs.customer_id = meta_donor.meta_value
-                    AND meta_donor.meta_key = '_give_payment_donor_id'
-                LEFT JOIN
+                    ON subs.id = meta_donor.meta_value
+                    AND meta_donor.meta_key = '_give_subscription_id'
+                INNER JOIN
                     {$wpdb->prefix}give_donationmeta AS meta_billing_first_name
                     ON meta_donor.donation_id = meta_billing_first_name.donation_id
                     AND meta_billing_first_name.meta_key = '_give_donor_billing_first_name'
-                LEFT JOIN
+                INNER JOIN
                     {$wpdb->prefix}give_donationmeta AS meta_billing_last_name
                     ON meta_donor.donation_id = meta_billing_last_name.donation_id
                     AND meta_billing_last_name.meta_key = '_give_donor_billing_last_name'
-                LEFT JOIN
+                INNER JOIN
                     {$wpdb->prefix}give_donationmeta AS meta_email
                     ON meta_donor.donation_id = meta_email.donation_id
                     AND meta_email.meta_key = '_give_payment_donor_email'
-                LEFT JOIN
+                INNER JOIN
                     {$wpdb->prefix}give_donationmeta AS meta_currency
                     ON meta_donor.donation_id = meta_currency.donation_id
                     AND meta_currency.meta_key = '_give_payment_currency'
-                LEFT JOIN
+                INNER JOIN
                     {$wpdb->prefix}give_donationmeta AS meta_recurring
                     ON meta_donor.donation_id = meta_recurring.donation_id
                     AND meta_recurring.meta_key = '_give_is_donation_recurring'
+                INNER JOIN
+                    {$wpdb->prefix}give_donationmeta AS meta_completed_date
+                    ON meta_donor.donation_id = meta_completed_date.donation_id
+                    AND meta_completed_date.meta_key = '_give_completed_date'
                 WHERE
                     subs.status = 'active'
                     AND meta_recurring.meta_value = '1'
-                    AND (subs.created BETWEEN %s AND %s OR subs.expiration BETWEEN %s AND %s)
+                    AND (%s BETWEEN subs.created AND subs.expiration OR %s BETWEEN subs.created AND subs.expiration)
                     AND subs.payment_mode = %s
                     AND meta_currency.meta_value = %s
-                GROUP BY
-                    subs.id
                 ",
-                $start_date,
-                $end_date,
                 $start_date,
                 $end_date,
                 $mode_param,
@@ -297,9 +299,8 @@ class LknRecurrencyGive
             $wpdb->prepare(
                 "SELECT SUM(recurring_amount) as total_amount
                 FROM {$wpdb->prefix}give_subscriptions
-                WHERE (expiration BETWEEN %s AND %s OR created BETWEEN %s AND %s)",
-                $start_next_month,
-                $end_next_month,
+                WHERE (%s BETWEEN created AND expiration OR %s BETWEEN created AND expiration)
+                AND status = 'active'",
                 $start_next_month,
                 $end_next_month
             )
@@ -310,23 +311,41 @@ class LknRecurrencyGive
         // Start between initial year and final year
         $start_year = "{$year_param}-01-01 00:00:00";
         $end_year = "{$year_param}-12-31 23:59:59";
+        $total_annual_amount = 0;
 
-        $result_annual_amount = $wpdb->get_var(
+        $annual_results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT SUM(recurring_amount) as total_amount
+                "
+                SELECT recurring_amount, created, expiration
                 FROM {$wpdb->prefix}give_subscriptions
-                WHERE (expiration BETWEEN %s AND %s OR created BETWEEN %s AND %s)",
+                WHERE (expiration BETWEEN %s AND %s OR created BETWEEN %s AND %s)
+                AND status = 'active'
+                ",
                 $start_year,
                 $end_year,
                 $start_year,
                 $end_year
             )
         );
-        $total_annual_amount = number_format($result_annual_amount, 2);
+
+        foreach ($annual_results as $result) {
+            $created_date = new \DateTime($result->created);
+            $expiration_date = new \DateTime($result->expiration);
+            $start_of_year = new \DateTime($start_year);
+
+            // Calcular a quantidade de meses entre o início do ano e a data de expiração
+            $months_from_start_of_year = $start_of_year->diff($expiration_date)->m + 1;
+
+            // Calcular o valor total
+            $total_annual_amount += $result->recurring_amount * $months_from_start_of_year;
+        }
+
+        // Formatar o valor total
+        $total_annual_amount = number_format($total_annual_amount, 2);
 
         // Process the results
-        if (!empty($results)) {
-            foreach ($results as $result) {
+        if (count($subscriptions_results) > 0) {
+            foreach ($subscriptions_results as $result) {
                 $created_date = \DateTime::createFromFormat('Y-m-d H:i:s', $result->created);
                 $result->day = $created_date ? $created_date->format('d') : null;
 
@@ -334,8 +353,8 @@ class LknRecurrencyGive
                 $data_grouped['donations'][] = $result;
             }
             $data_grouped['date'] = $date_key;
-            $data_grouped['next_month_total'] = (float) $total_month_amount;
-            $data_grouped['annual_total'] = (float) $total_annual_amount;
+            $data_grouped['next_month_total'] = $total_month_amount;
+            $data_grouped['annual_total'] = $total_annual_amount;
 
             wp_send_json_success($data_grouped);
         } else {

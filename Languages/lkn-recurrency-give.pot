@@ -11,7 +11,7 @@ msgstr ""
 "<translations@example."
 "com>\n"
 "POT-Creation-Date: "
-"2024-12-23 16:24-0300\n"
+"2024-12-29 19:38-0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Your "
 "Name <you@example.com>\n"
@@ -117,16 +117,16 @@ msgid ""
 "Plugin%2$s"
 msgstr ""
 
-#: Includes/LknRecurrencyGive.php:175
+#: Includes/LknRecurrencyGive.php:176
 msgid ""
 "Nonce verification "
 "failed."
 msgstr ""
 
-#: Includes/LknRecurrencyGive.php:188
-#: Includes/LknRecurrencyGive.php:194
-#: Includes/LknRecurrencyGive.php:200
-#: Includes/LknRecurrencyGive.php:206
+#: Includes/LknRecurrencyGive.php:189
+#: Includes/LknRecurrencyGive.php:195
+#: Includes/LknRecurrencyGive.php:201
+#: Includes/LknRecurrencyGive.php:207
 #, php-format
 msgid ""
 "No parameter for "
@@ -134,11 +134,11 @@ msgid ""
 "found."
 msgstr ""
 
-#: Includes/LknRecurrencyGive.php:217
+#: Includes/LknRecurrencyGive.php:218
 msgid "Permission denied."
 msgstr ""
 
-#: Includes/LknRecurrencyGive.php:340
+#: Includes/LknRecurrencyGive.php:361
 msgid ""
 "No donation ID found."
 msgstr ""
