@@ -331,13 +331,23 @@ class LknRecurrencyGive
         foreach ($annual_results as $result) {
             $created_date = new \DateTime($result->created);
             $expiration_date = new \DateTime($result->expiration);
+
+            // Definir o início e o fim do ano corrente
             $start_of_year = new \DateTime($start_year);
+            $end_of_year = new \DateTime($end_year);
 
-            // Calcular a quantidade de meses entre o início do ano e a data de expiração
-            $months_from_start_of_year = $start_of_year->diff($expiration_date)->m + 1;
+            // Ajustar as datas de criação e expiração para ficarem dentro do intervalo
+            $effective_start = max($created_date, $start_of_year);
+            $effective_end = min($expiration_date, $end_of_year);
 
-            // Calcular o valor total
-            $total_annual_amount += $result->recurring_amount * $months_from_start_of_year;
+            // Calcular os meses válidos apenas no intervalo
+            if ($effective_start <= $effective_end) {
+                $interval = $effective_start->diff($effective_end);
+                $months_in_period = ($interval->y * 12) + $interval->m + 1;
+
+                // Adicionar o valor ao total anual
+                $total_annual_amount += $result->recurring_amount * $months_in_period;
+            }
         }
 
         // Formatar o valor total
