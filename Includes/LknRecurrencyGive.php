@@ -245,7 +245,7 @@ class LknRecurrencyGive
                 INNER JOIN
                     {$wpdb->prefix}give_donationmeta AS meta_donor
                     ON subs.id = meta_donor.meta_value
-                    AND meta_donor.meta_key = '_give_subscription_id'
+                    AND meta_donor.meta_key = 'subscription_id'
                 INNER JOIN
                     {$wpdb->prefix}give_donationmeta AS meta_billing_first_name
                     ON meta_donor.donation_id = meta_billing_first_name.donation_id
