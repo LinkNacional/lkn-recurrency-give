@@ -147,43 +147,6 @@ class LknRecurrencyGive
         $this->loader->add_action('init', $this, 'update_payments_settings');
     }
 
-    public function update_payments_settings()
-    {
-        add_action('admin_menu', function () {
-            // Adicionar um submenu diretamente no menu principal do GiveWP
-            add_submenu_page(
-                'edit.php?post_type=give_forms',
-                __('Update Data', 'lkn-recurrency-give'),
-                __('Update Data', 'lkn-recurrency-give'),
-                'manage_options',
-                'update-data',
-                array($this, 'render_update_page')
-            );
-        });
-    }
-
-    public function render_update_page()
-    {
-        $content = '<div class="wrap">';
-        $content .= '<h1>' . __('Update Cielo Payment Data', 'lkn-recurrency-give') . '</h1>';
-        $content .= '<p>' . __('Click the button below to update the recurring payment data from Cielo.', 'lkn-recurrency-give') . '</p>';
-
-        // Div com display flex e gap
-        $content .= '<div style="display: flex; gap: 10px; flex-wrap: wrap;">';
-        // Botão de atualizar
-        $content .= '<button id="update-cielo-btn" class="button button-primary">' . __('Update Data', 'lkn-recurrency-give') . '</button>';
-        // Botão de limpar
-        $content .= '<button id="clear-recurrences-btn" class="button" style="background-color: #f25151; color: white; border: 1px solid #f25151;">' . __('Clear Recurrences', 'lkn-recurrency-give') . '</button>';
-        $content .= '</div>';
-
-        // Div para exibir mensagens
-        $content .= '<div id="lkn-message" style="margin-top: 15px;"></div>';
-
-        $content .= '</div>';
-
-        echo $content;
-    }
-
     public function registerApiRoute()
     {
         register_rest_route('lkn-recurrency/v1', '/content/', array(
@@ -196,94 +159,35 @@ class LknRecurrencyGive
             'callback' => array($this, 'update_content')
         ));
 
-        register_rest_route('lkn-recurrency/v1', '/clear/', array(
+        register_rest_route('lkn-recurrency/v1', '/verify/', array(
             'methods' => 'POST',
-            'callback' => array($this, 'clear_content')
+            'callback' => array($this, 'verify_content')
         ));
     }
 
-    public function clear_content()
+    public function verify_content()
     {
         global $wpdb;
 
         // Query to get subscription_ids from meta
         $results = $wpdb->get_results(
             "
-            SELECT DISTINCT dm1.donation_id,
-                            dm3.meta_value AS subscription_id,
-                            dm2.meta_value AS give_cielo_response
-            FROM {$wpdb->prefix}give_donationmeta AS dm1
-            INNER JOIN {$wpdb->prefix}give_donationmeta AS dm2
-                ON dm1.donation_id = dm2.donation_id
-            LEFT JOIN {$wpdb->prefix}give_donationmeta AS dm3
-                ON dm1.donation_id = dm3.donation_id
-                AND dm3.meta_key = 'subscription_id'
-            WHERE dm1.meta_key = '_give_is_donation_recurring'
-            AND dm1.meta_value = '1'
-            AND dm2.meta_key = 'give_cielo_response'
-        "
-        );
-
-        $subscription_ids_from_meta = [];
-
-        // Check if no results were returned
-        if (!empty($results)) {
-            // Array to store subscription_ids obtained from meta
-
-            foreach ($results as $result) {
-                // Decode the value of give_cielo_response
-                $give_cielo_response = json_decode($result->give_cielo_response, true);
-
-                // Check if 'subscription_id' field exists in the JSON
-                if (isset($give_cielo_response['subscription_id'])) {
-                    $subscription_ids_from_meta[] = $give_cielo_response['subscription_id'];
-                }
-            }
-        }
-
-        // Query to get all subscription_ids in the wp_give_subscriptions table
-        $subscriptions = $wpdb->get_results(
-            "
-                SELECT id
-                FROM {$wpdb->prefix}give_subscriptions
+                SELECT DISTINCT dm1.donation_id,
+                                dm3.meta_value AS subscription_id,
+                                dm2.meta_value AS give_cielo_response
+                FROM {$wpdb->prefix}give_donationmeta AS dm1
+                INNER JOIN {$wpdb->prefix}give_donationmeta AS dm2
+                    ON dm1.donation_id = dm2.donation_id
+                LEFT JOIN {$wpdb->prefix}give_donationmeta AS dm3
+                    ON dm1.donation_id = dm3.donation_id
+                    AND dm3.meta_key = 'subscription_id'
+                WHERE dm1.meta_key = '_give_is_donation_recurring'
+                AND dm1.meta_value = '1'
+                AND dm2.meta_key = 'give_cielo_response'
             "
         );
 
-        // Check if there are any subscriptions in the table
-        if (empty($subscriptions)) {
-            return new WP_REST_Response([
-                'status' => false,
-                'message' => __("No data available for clearing.", 'lkn-recurrency-give'),
-            ], 200);
-        }
 
-        // Create an array with all subscription_ids from the table
-        $subscription_ids = array_map(function ($subscription) {
-            return $subscription->id;
-        }, $subscriptions);
-
-        // Identify the subscription IDs that can be cleared
-        $subscriptions_to_clear = array_diff($subscription_ids, $subscription_ids_from_meta);
-
-        // Check if there are any IDs to clear
-        if (empty($subscriptions_to_clear)) {
-            return new WP_REST_Response([
-                'status' => false,
-                'message' => __("All subscriptions are valid, nothing to clear.", 'lkn-recurrency-give'),
-            ], 200);
-        }
-
-        // Clear the subscription_ids from the wp_give_subscriptions table
-        $placeholders = implode(',', array_fill(0, count($subscriptions_to_clear), '%d'));
-        $wpdb->query(
-            $wpdb->prepare(
-                "
-            DELETE FROM {$wpdb->prefix}give_subscriptions
-            WHERE id IN ($placeholders)
-        ",
-                ...$subscriptions_to_clear
-            )
-        );
 
         return new WP_REST_Response([
             'status' => true,
@@ -329,10 +233,10 @@ class LknRecurrencyGive
                     $expiration_date = $wpdb->get_var(
                         $wpdb->prepare(
                             "
-                        SELECT expiration
-                        FROM {$wpdb->prefix}give_subscriptions
-                        WHERE id = %d
-                        ",
+                                SELECT expiration
+                                FROM {$wpdb->prefix}give_subscriptions
+                                WHERE id = %d
+                            ",
                             $subscription_id
                         )
                     );
@@ -545,10 +449,18 @@ class LknRecurrencyGive
 
         $result_month_amount = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT SUM(recurring_amount) as total_amount
-                FROM {$wpdb->prefix}give_subscriptions
-                WHERE (%s BETWEEN created AND expiration OR %s BETWEEN created AND expiration)
-                AND status = 'active'",
+                "
+                SELECT SUM(subs.recurring_amount) AS total_amount
+                FROM
+                    {$wpdb->prefix}give_subscriptions AS subs
+                INNER JOIN
+                    {$wpdb->prefix}give_donationmeta AS meta_donor
+                    ON subs.id = meta_donor.meta_value
+                    AND meta_donor.meta_key = 'subscription_id'
+                WHERE
+                    (%s BETWEEN subs.created AND subs.expiration OR %s BETWEEN subs.created AND subs.expiration)
+                    AND subs.status = 'active'
+                ",
                 $start_next_month,
                 $end_next_month
             )
@@ -564,10 +476,19 @@ class LknRecurrencyGive
         $annual_results = $wpdb->get_results(
             $wpdb->prepare(
                 "
-                SELECT recurring_amount, created, expiration
-                FROM {$wpdb->prefix}give_subscriptions
-                WHERE (expiration BETWEEN %s AND %s OR created BETWEEN %s AND %s)
-                AND status = 'active'
+                SELECT
+                    subs.recurring_amount,
+                    subs.created,
+                    subs.expiration
+                FROM
+                    {$wpdb->prefix}give_subscriptions AS subs
+                INNER JOIN
+                    {$wpdb->prefix}give_donationmeta AS meta_donor
+                    ON subs.id = meta_donor.meta_value
+                    AND meta_donor.meta_key = 'subscription_id'
+                WHERE
+                    (subs.expiration BETWEEN %s AND %s OR subs.created BETWEEN %s AND %s)
+                    AND subs.status = 'active'
                 ",
                 $start_year,
                 $end_year,

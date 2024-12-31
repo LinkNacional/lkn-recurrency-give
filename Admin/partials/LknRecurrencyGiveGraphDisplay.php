@@ -11,6 +11,10 @@ $currentMonth = gmdate("m");
     </div>
     <h1></h1>
 
+    <div id="lkn-update-data">
+        <p><strong>Atenção:</strong> Notamos que sua tabela possui pagamentos recorrentes inválidos, deseja atualiza-los? <button id="update-cielo-btn">Atualizar Dados</button></p>
+    </div>
+
     <div class="chart-container">
         <span
             class="lkn-error-message"
