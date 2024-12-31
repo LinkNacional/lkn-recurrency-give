@@ -144,7 +144,6 @@ class LknRecurrencyGive
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
         $this->loader->add_action('wp_ajax_lkn_get_recurrency_data', $this, 'lkn_handle_get_recurrency_data');
         $this->loader->add_action('rest_api_init', $this, 'registerApiRoute');
-        $this->loader->add_action('init', $this, 'update_payments_settings');
     }
 
     public function registerApiRoute()
@@ -187,11 +186,57 @@ class LknRecurrencyGive
             "
         );
 
+        if (!empty($results)) {
+            foreach ($results as $result) {
+                // Decode the give_cielo_response value
+                $give_cielo_response = json_decode($result->give_cielo_response, true);
 
+                // Check if the 'subscription_id' field exists in the JSON
+                if (isset($give_cielo_response['subscription_id'])) {
+                    $subscription_id = $give_cielo_response['subscription_id'];
+                    $donation_id = $result->donation_id;
+
+                    // Query to get the expiration date
+                    $expiration_date = $wpdb->get_var(
+                        $wpdb->prepare(
+                            "
+                                SELECT expiration
+                                FROM {$wpdb->prefix}give_subscriptions
+                                WHERE id = %d
+                            ",
+                            $subscription_id
+                        )
+                    );
+
+                    // Part 1: If subscription_id is 0, update the subscription_id meta
+                    if ($result->subscription_id == '0') {
+                        return new WP_REST_Response([
+                            'status' => true,
+                            'message' => __("No subscription found.", 'lkn-recurrency-give'),
+                        ], 200);
+                    }
+
+                    // Part 2: If expiration date is less than current date, update the expiration date
+                    if ($expiration_date) {
+                        // Convert the expiration date to a DateTime object
+                        $expiration_datetime = new \DateTime($expiration_date);
+                        $current_datetime = new \DateTime(); // Current date and time
+
+                        // Compare the expiration date with the current date
+                        if ($expiration_datetime <= $current_datetime) {
+                            return new WP_REST_Response([
+                                'status' => true,
+                                'message' => __("No subscription found.", 'lkn-recurrency-give'),
+                            ], 200);
+                        }
+                    }
+                }
+            }
+        }
 
         return new WP_REST_Response([
-            'status' => true,
-            'message' => __("Subscriptions cleared successfully.", 'lkn-recurrency-give'),
+            'status' => false,
+            'message' => __("No recurring subscriptions found.", 'lkn-recurrency-give'),
         ], 200);
     }
 
