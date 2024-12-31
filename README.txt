@@ -13,17 +13,18 @@ Link Nacional GiveWP Recurrency
 
 == Short Description ==
 
-This plugin creates a dashboard with payment recurrence data from GiveWP, providing customized charts and detailed donation information.
+A plugin that integrates with GiveWP, offering an advanced dashboard and recurring donation data updates to efficiently manage fundraising campaigns.
 
 == Description ==
 
-Link Nacional GiveWP Recurrency is a powerful plugin that integrates with GiveWP to provide a comprehensive dashboard for monitoring recurring donations. With this plugin, users can view customized charts and detailed data about their donations, helping them to better understand and manage their fundraising efforts.
+Link Nacional GiveWP Recurrency is a powerful plugin that integrates with GiveWP to provide a comprehensive dashboard for monitoring and managing recurring donations. With this plugin, users can view custom charts, detailed data, and update invalid information directly from the panel, ensuring recurrences are always organized and accurate. Perfect for optimizing fundraising efforts.
 
 Key features include:
 * Customized charts displaying donation data
 * Detailed information about each donation
 * Easy-to-use dashboard interface
 * Integration with GiveWP for seamless data retrieval
+* Data Update (Main menu of GiveWP > Update Data)
 
 This plugin is ideal for non-profits and organizations that rely on recurring donations and need a robust tool to track and analyze their donation data.
 
@@ -53,7 +54,16 @@ Yes, the plugin provides options to customize the charts to better suit your nee
 == Changelog ==
 
 = 1.0.0 =
-* Initial release of Link Nacional GiveWP Recurrency
+* Initial release.
+* Dashboard.
+* Listing of recurring payments.
+* Total amount (Monthly).
+* Expected quantity for the next month.
+* Expected quantity for the year.
+* Top 5 donors.
+* Last 5 donations.
+* Update invalid data.
+* Remove recurrences without donations.
 
 == Upgrade Notice ==
 

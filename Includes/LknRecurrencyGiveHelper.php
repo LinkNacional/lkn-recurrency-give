@@ -49,4 +49,18 @@ class LknRecurrencyGiveHelper
             'reviewIconAlt' => __('Review icon', 'lkn-recurrency-give')
         ];
     }
+
+    public static function get_texts_update()
+    {
+        return [
+            'updating' => __('Updating...', 'lkn-recurrency-give'),
+            'updateButton' => __('Update Data', 'lkn-recurrency-give'),
+            'successMessage' => __('Update completed successfully!', 'lkn-recurrency-give'),
+            'noUpdateMessage' => __('No updates were needed.', 'lkn-recurrency-give'),
+            'errorMessage' => __('An error occurred while updating. Please try again.', 'lkn-recurrency-give'),
+            'clearing' => __('Clearing...', 'lkn-recurrency-give'),
+            'clearButton' => __('Clear Recurrences', 'lkn-recurrency-give'),
+            'confirmClear' => __('Are you sure you want to clear all recurrences without donations associated to them?', 'lkn-recurrency-give'),
+        ];
+    }
 }

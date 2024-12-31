@@ -11,7 +11,7 @@ msgstr ""
 "<translations@example."
 "com>\n"
 "POT-Creation-Date: "
-"2024-12-29 19:38-0300\n"
+"2024-12-31 08:11-0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Your "
 "Name <you@example.com>\n"
@@ -117,16 +117,74 @@ msgid ""
 "Plugin%2$s"
 msgstr ""
 
+#: Includes/LknRecurrencyGive.php:156
+#: Includes/LknRecurrencyGive.php:157
+#: Includes/LknRecurrencyGive.php:174
+#: Includes/LknRecurrencyGiveHelper.php:57
+msgid "Update Data"
+msgstr ""
+
+#: Includes/LknRecurrencyGive.php:168
+msgid ""
+"Update Cielo Payment Data"
+msgstr ""
+
+#: Includes/LknRecurrencyGive.php:169
+msgid ""
+"Click the button below "
+"to update the recurring "
+"payment data from Cielo."
+msgstr ""
+
 #: Includes/LknRecurrencyGive.php:176
+#: Includes/LknRecurrencyGiveHelper.php:62
+msgid "Clear Recurrences"
+msgstr ""
+
+#: Includes/LknRecurrencyGive.php:231
+msgid "Nothing to clear."
+msgstr ""
+
+#: Includes/LknRecurrencyGive.php:260
+msgid ""
+"No data available for "
+"clearing."
+msgstr ""
+
+#: Includes/LknRecurrencyGive.php:276
+msgid ""
+"All subscriptions are "
+"valid, nothing to clear."
+msgstr ""
+
+#: Includes/LknRecurrencyGive.php:294
+msgid ""
+"Subscriptions cleared "
+"successfully."
+msgstr ""
+
+#: Includes/LknRecurrencyGive.php:399
+msgid ""
+"Subscriptions updated "
+"successfully."
+msgstr ""
+
+#: Includes/LknRecurrencyGive.php:404
+msgid ""
+"No subscriptions require "
+"updates."
+msgstr ""
+
+#: Includes/LknRecurrencyGive.php:428
 msgid ""
 "Nonce verification "
 "failed."
 msgstr ""
 
-#: Includes/LknRecurrencyGive.php:189
-#: Includes/LknRecurrencyGive.php:195
-#: Includes/LknRecurrencyGive.php:201
-#: Includes/LknRecurrencyGive.php:207
+#: Includes/LknRecurrencyGive.php:441
+#: Includes/LknRecurrencyGive.php:447
+#: Includes/LknRecurrencyGive.php:453
+#: Includes/LknRecurrencyGive.php:459
 #, php-format
 msgid ""
 "No parameter for "
@@ -134,11 +192,11 @@ msgid ""
 "found."
 msgstr ""
 
-#: Includes/LknRecurrencyGive.php:218
+#: Includes/LknRecurrencyGive.php:470
 msgid "Permission denied."
 msgstr ""
 
-#: Includes/LknRecurrencyGive.php:361
+#: Includes/LknRecurrencyGive.php:623
 msgid ""
 "No donation ID found."
 msgstr ""
@@ -302,4 +360,38 @@ msgstr ""
 
 #: Includes/LknRecurrencyGiveHelper.php:49
 msgid "Review icon"
+msgstr ""
+
+#: Includes/LknRecurrencyGiveHelper.php:56
+msgid "Updating..."
+msgstr ""
+
+#: Includes/LknRecurrencyGiveHelper.php:58
+msgid ""
+"Update completed "
+"successfully!"
+msgstr ""
+
+#: Includes/LknRecurrencyGiveHelper.php:59
+msgid ""
+"No updates were needed."
+msgstr ""
+
+#: Includes/LknRecurrencyGiveHelper.php:60
+msgid ""
+"An error occurred while "
+"updating. Please try "
+"again."
+msgstr ""
+
+#: Includes/LknRecurrencyGiveHelper.php:61
+msgid "Clearing..."
+msgstr ""
+
+#: Includes/LknRecurrencyGiveHelper.php:63
+msgid ""
+"Are you sure you want to "
+"clear all recurrences "
+"without donations "
+"associated to them?"
 msgstr ""

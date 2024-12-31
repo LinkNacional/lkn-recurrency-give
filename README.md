@@ -16,11 +16,11 @@
 
 ## Descrição Curta
 
-Este plugin cria um dashboard com dados de recorrência de pagamento do GiveWP, fornecendo gráficos personalizados e informações detalhadas sobre as doações.
+Plugin para integrar o GiveWP, com dashboard avançado e atualização de dados de doações recorrentes, ajudando a gerenciar arrecadações de forma eficiente.
 
 ## Descrição
 
-Link Nacional GiveWP Recurrency é um plugin poderoso que integra com GiveWP para fornecer um dashboard abrangente para monitorar doações recorrentes. Com este plugin, os usuários podem visualizar gráficos personalizados e dados detalhados sobre suas doações, ajudando-os a entender e gerenciar melhor seus esforços de arrecadação de fundos.
+Link Nacional GiveWP Recurrency é um plugin poderoso que integra com o GiveWP para fornecer um dashboard abrangente que permite monitorar e gerenciar doações recorrentes. Com este plugin, os usuários podem visualizar gráficos personalizados, dados detalhados e atualizar informações inválidas diretamente no painel, garantindo que as recorrências estejam sempre organizadas e precisas. Ideal para otimizar esforços de arrecadação de fundos.
 
 ### Principais Funcionalidades
 
@@ -30,6 +30,7 @@ Link Nacional GiveWP Recurrency é um plugin poderoso que integra com GiveWP par
 * Quantidade esperada para o ano
 * Top 5 doadores
 * Últimas 5 doações
+* Atualização de dados (Menu principal do giveWP > Atualizar Dados)
 
 Este plugin é ideal para organizações sem fins lucrativos que dependem de doações recorrentes e precisam de uma ferramenta robusta para rastrear e analisar seus dados de doações.
 
@@ -49,7 +50,16 @@ Sim, Link Nacional GiveWP Recurrency é testado e compatível com a versão mais
 
 ### 1.0.0
 
-* Lançamento inicial do Link Nacional GiveWP Recurrency
+* Lançamento da versão inicial.
+* Dashboard.
+* Listagem de pagamentos recorrêntes.
+* Valor total(Mensal).
+* Quantidade esperada para o próximo mês.
+* Quantidade esperada para o ano.
+* Top 5 doadores.
+* Últimas 5 Doesções.
+* Atualizar dados inválidos.
+* Excluir recorrências sem doação.
 
 ## Licença
 

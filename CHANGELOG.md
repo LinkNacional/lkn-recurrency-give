@@ -7,3 +7,5 @@
   * Quantidade esperada para o ano.
   * Top 5 doadores.
   * Últimas 5 Doesções.
+  * Atualizar dados inválidos.
+  * Excluir recorrências sem doação.
