@@ -148,22 +148,6 @@ class LknRecurrencyGiveAdmin
                 LknRecurrencyGiveHelper::get_texts()
             );
         }
-
-        if (isset($_GET['page']) && sanitize_text_field(wp_unslash($_GET['page'])) === 'update-data') {
-            wp_enqueue_script(
-                'lkn-settings-update',
-                plugin_dir_url(__FILE__) . 'js/LknRecurrencyGiveUpdateData.js',
-                array( 'jquery' ),
-                $this->version,
-                false
-            );
-
-            wp_localize_script(
-                'lkn-settings-update',
-                'lknRecurrencyTexts',
-                LknRecurrencyGiveHelper::get_texts_update()
-            );
-        }
     }
 
 }

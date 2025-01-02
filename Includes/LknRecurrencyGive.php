@@ -314,8 +314,38 @@ class LknRecurrencyGive
                             $months_to_add = ($current_datetime->format('Y') - $expiration_datetime->format('Y')) * 12;
                             $months_to_add += ($current_datetime->format('m') - $expiration_datetime->format('m')) + 1;
 
-                            // Adjust the expiration date to be one month ahead of the current month
-                            $expiration_datetime->modify("+{$months_to_add} months");
+                            // Get the potential new month and year after adding months
+                            $new_month = (int) $expiration_datetime->format('m') + $months_to_add;
+                            $new_year = (int) $expiration_datetime->format('Y');
+
+                            // Adjust year and month if the new month exceeds 12
+                            while ($new_month > 12) {
+                                $new_month -= 12;
+                                $new_year++;
+                            }
+
+                            // Check if the new month is February and the current day exceeds 28/29
+                            if ($new_month === 2) {
+                                // Determine if the new year is a leap year
+                                $is_leap_year = ($new_year % 4 === 0 && $new_year % 100 !== 0) || ($new_year % 400 === 0);
+                                $last_day_of_february = $is_leap_year ? 29 : 28;
+
+                                // If the current day exceeds the last day of February, adjust it
+                                if ((int) $expiration_datetime->format('d') > $last_day_of_february) {
+                                    $expiration_datetime->setDate($new_year, $new_month, $last_day_of_february);
+                                } else {
+                                    $expiration_datetime->setDate($new_year, $new_month, (int) $expiration_datetime->format('d'));
+                                }
+                            } else {
+                                // For other months, ensure the day doesn't exceed the last day of the month
+                                $last_day_of_month = cal_days_in_month(CAL_GREGORIAN, $new_month, $new_year);
+
+                                if ((int) $expiration_datetime->format('d') > $last_day_of_month) {
+                                    $expiration_datetime->setDate($new_year, $new_month, $last_day_of_month);
+                                } else {
+                                    $expiration_datetime->setDate($new_year, $new_month, (int) $expiration_datetime->format('d'));
+                                }
+                            }
 
                             // Update the expiration date in the give_subscriptions table
                             $new_expiration_date = $expiration_datetime->format('Y-m-d H:i:s'); // Format for MySQL
@@ -341,14 +371,15 @@ class LknRecurrencyGive
         if ($updated_count > 0) {
             return new WP_REST_Response([
                 'status' => true,
-                'message' => __("Subscriptions updated successfully.", 'lkn-recurrency-give'),
+                'message' => __('Subscriptions updated successfully.', 'lkn-recurrency-give'),
             ], 200);
         } else {
             return new WP_REST_Response([
                 'status' => false,
-                'message' => __("No subscriptions require updates.", 'lkn-recurrency-give'),
+                'message' => __('No subscriptions require updates.', 'lkn-recurrency-give'),
             ], 200);
         }
+
     }
 
 

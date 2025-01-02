@@ -240,6 +240,8 @@
             populateTable(responseData)
             renderTopFiveDonorsChart(responseData)
             renderLastFiveDonationsList(responseData)
+            // Call verifyPluginStatus on page load to set the display state
+            verifyPluginStatus()
 
             const formatMonthlyTotal = `<p>${formatTotal.format(data.total.toFixed(2))}</p>`
             monthlyValue.html(formatMonthlyTotal)
@@ -918,6 +920,96 @@
       })
     }
 
+    // Common function to make an AJAX request
+    function makeRequest(url, button) {
+      $.ajax({
+        url,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: JSON.stringify({}),
+        success: function (response) {
+          $('#lkn-update-data').css('display', 'flex')
+
+          if (response.status) {
+            $('#lkn-update-data p').text(response.message)
+
+            $('#lkn-update-data').css({
+              'border-left': '4px solid rgba(0, 128, 0, 0.7)'
+            })
+
+            setTimeout(function () {
+              location.reload()
+            }, 3000)
+          } else {
+            $('#lkn-update-data p').text(response.message)
+
+            $('#lkn-update-data').css('border-left', '4px solid rgba(0, 0, 255, 0.7)')
+
+            setTimeout(function () {
+              $('#lkn-update-data').remove()
+            }, 5000)
+          }
+        },
+        error: function () {
+          $('#lkn-update-data').css('display', 'flex')
+
+          $('#lkn-update-data p').text(lknRecurrencyTexts.error_message_update)
+
+          $('#lkn-update-data').css('border-left', '4px solid rgba(255, 0, 0, 0.7)')
+
+          setTimeout(function () {
+            $('#lkn-update-data').remove()
+          }, 5000)
+        }
+      })
+    }
+
+    // Function to verify the plugin status
+    function verifyPluginStatus() {
+      $.ajax({
+        url: '/wp-json/lkn-recurrency/v1/verify', // New endpoint for verification
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: JSON.stringify({}),
+        success: function (response) {
+          if (response.status) {
+            // If status is true, show the update section
+            $('#lkn-update-data').css('display', 'flex')
+
+            // Update Cielo data
+            $('#update-cielo-btn').on('click', function (e) {
+              e.preventDefault()
+
+              const button = $(this)
+
+              // Show confirmation message to the user using the global text
+              const confirmBackup = confirm(lknRecurrencyTexts.confirm_backup_message)
+
+              if (confirmBackup) {
+                // Disable the button and show loading text
+                button.prop('disabled', true).data('original-text', button.text()).text(lknRecurrencyTexts.updating).css({
+                  color: '#d3d3d3',
+                  cursor: 'not-allowed'
+                })
+
+                // Make AJAX request to update Cielo data
+                makeRequest('/wp-json/lkn-recurrency/v1/update', button)
+              }
+            })
+          } else {
+            // If status is false, hide the update section
+            $('#lkn-update-data').remove()
+          }
+        },
+        error: function () {
+          // Handle any errors here (optional)
+        }
+      })
+    }
     // Carrega os dados iniciais
     getTab()
   })

@@ -12,8 +12,15 @@ $currentMonth = gmdate("m");
     <h1></h1>
 
     <div id="lkn-update-data">
-        <p><strong>Atenção:</strong> Notamos que sua tabela possui pagamentos recorrentes inválidos, deseja atualiza-los? <button id="update-cielo-btn">Atualizar Dados</button></p>
+        <p>
+            <strong><?php esc_html_e('Attention:', 'lkn-recurrency-give'); ?></strong>
+            <?php esc_html_e('We have identified recurring donations with invalid data.', 'lkn-recurrency-give'); ?>
+            <button id="update-cielo-btn" title="<?php esc_attr_e('Update recurring donation data.', 'lkn-recurrency-give'); ?>">
+                <?php esc_html_e('Update recurring donation data.', 'lkn-recurrency-give'); ?>
+            </button>
+        </p>
     </div>
+
 
     <div class="chart-container">
         <span

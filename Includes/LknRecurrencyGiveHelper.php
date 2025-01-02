@@ -6,6 +6,15 @@ class LknRecurrencyGiveHelper
 {
     public static function get_texts()
     {
+        global $wpdb;
+
+        $backup_message = sprintf(
+            // Translators: %1$s is the first table name, %2$s is the second table name.
+            __('It is recommended that you back up the %1$s and %2$s tables before proceeding with the update. Do you wish to continue?', 'lkn-recurrency-give'),
+            $wpdb->prefix . 'give_subscriptions',
+            $wpdb->prefix . 'give_donationmeta'
+        );
+
         return [
             'total_donations' => __('Total donations', 'lkn-recurrency-give'),
             'date_label' => __('Dates', 'lkn-recurrency-give'),
@@ -46,21 +55,12 @@ class LknRecurrencyGiveHelper
             'payment_mode_production' => __('Production', 'lkn-recurrency-give'),
             'reviewButtonTitle' => __('Review', 'lkn-recurrency-give'),
             'reviewButtonText' => __('Review', 'lkn-recurrency-give'),
-            'reviewIconAlt' => __('Review icon', 'lkn-recurrency-give')
-        ];
-    }
-
-    public static function get_texts_update()
-    {
-        return [
+            'reviewIconAlt' => __('Review icon', 'lkn-recurrency-give'),
             'updating' => __('Updating...', 'lkn-recurrency-give'),
-            'updateButton' => __('Update Data', 'lkn-recurrency-give'),
-            'successMessage' => __('Update completed successfully!', 'lkn-recurrency-give'),
-            'noUpdateMessage' => __('No updates were needed.', 'lkn-recurrency-give'),
-            'errorMessage' => __('An error occurred while updating. Please try again.', 'lkn-recurrency-give'),
-            'clearing' => __('Clearing...', 'lkn-recurrency-give'),
-            'clearButton' => __('Clear Recurrences', 'lkn-recurrency-give'),
-            'confirmClear' => __('Are you sure you want to clear all recurrences without donations associated to them?', 'lkn-recurrency-give'),
+            'confirm_backup_message' => $backup_message,
+            'updating_text' => __('Updating...', 'lkn-recurrency-give'),
+            'success_message' => __('Update completed successfully!', 'lkn-recurrency-give'),
+            'error_message_update' => __('An error occurred while updating. Please try again.', 'lkn-recurrency-give'),
         ];
     }
 }

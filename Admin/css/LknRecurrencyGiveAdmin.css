@@ -21,15 +21,15 @@
 
 /* Error message */
 #lkn-update-data {
-    display: flex;
+    display: none;
     align-items: center;
     min-height: 30px;
-    width: fit-content;
     background-color: #fff;
     border: 1px solid #d4d4d4;
     border-left: 4px solid #ffb900;
     margin-bottom: 20px;
     padding-left: 10px;
+    overflow: hidden;
 }
 
 #update-cielo-btn {
