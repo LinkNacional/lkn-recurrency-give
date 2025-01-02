@@ -1,3 +1,6 @@
+# 1.0.1 - 02/01/2025
+  * Correção de evento de click.
+
 # 1.0.0 - 23/12/2024
   * Lançamento da versão inicial.
   * Dashboard.

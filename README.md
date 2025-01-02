@@ -8,7 +8,7 @@
 
 **Testado até:** 6.7
 
-**Versão estável:** 1.0.0
+**Versão estável:** 1.0.1
 
 **Licença:** GPLv2 ou posterior
 
@@ -47,6 +47,10 @@ Este plugin é ideal para organizações sem fins lucrativos que dependem de doa
 Sim, Link Nacional GiveWP Recurrency é testado e compatível com a versão mais recente do GiveWP.
 
 ## Changelog
+
+### 1.0.1
+
+* Correção de evento de click.
 
 ### 1.0.0
 
