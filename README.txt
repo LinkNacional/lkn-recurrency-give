@@ -24,7 +24,7 @@ Key features include:
 * Detailed information about each donation
 * Easy-to-use dashboard interface
 * Integration with GiveWP for seamless data retrieval
-* Data Update (Main menu of GiveWP > Update Data)
+* Data Update
 
 This plugin is ideal for non-profits and organizations that rely on recurring donations and need a robust tool to track and analyze their donation data.
 
