@@ -1,0 +1,28 @@
+{
+    "name": "lkn/lkn-recurrency-give",
+    "type": "project",
+    "license": "Proprietary",
+    "autoload": {
+        "psr-4": {
+            "Lkn\\RecurrencyGive\\Includes\\": "Includes/",
+            "Lkn\\RecurrencyGive\\Admin\\": "Admin/",
+            "Lkn\\RecurrencyGive\\PublicView\\": "Public/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Link Nacional",
+            "email": "ticket@linknacional.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require-dev": {
+        "phan/phan": "5.4.1"
+    },
+    "require": {},
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true
+        }
+    }
+}

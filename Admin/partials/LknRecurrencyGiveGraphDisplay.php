@@ -1,0 +1,163 @@
+<?php
+$currentYear = gmdate("Y");
+$currentMonth = gmdate("m");
+?>
+<div class="lkn-wrap">
+    <div id="lkn-recurrency-loading">
+        <img
+            src="<?php echo esc_url(LKN_RECURRENCY_GIVE_URL . 'Includes/assets/gifs/loading.gif'); ?>"
+            alt="<?php esc_html_e('loading animation', 'lkn-recurrency-give'); ?>"
+        >
+    </div>
+    <h1></h1>
+
+    <div id="lkn-update-data">
+        <p>
+            <strong><?php esc_html_e('Attention:', 'lkn-recurrency-give'); ?></strong>
+            <?php esc_html_e('We have identified recurring donations with invalid data.', 'lkn-recurrency-give'); ?>
+            <button id="update-cielo-btn" title="<?php esc_attr_e('Update recurring donation data.', 'lkn-recurrency-give'); ?>">
+                <?php esc_html_e('Update recurring donation data.', 'lkn-recurrency-give'); ?>
+            </button>
+        </p>
+    </div>
+
+
+    <div class="chart-container">
+        <span
+            class="lkn-error-message"
+            style="display: none;"
+        ></span>
+        <canvas id="recurrencyChart"></canvas>
+    </div>
+
+    <div
+        id="lkn-review-modal"
+        class="lkn-modal"
+        style="display: none;"
+    >
+        <div class="lkn-modal-container">
+            <span
+                class="lkn-close-button"
+                id="lkn-close-review-modal"
+            >&times;</span>
+            <h2><?php esc_html_e('General Review', 'lkn-recurrency-give'); ?>
+            </h2>
+            <div id="lkn-modal-content"></div>
+        </div>
+    </div>
+
+    <div class="lkn-review-container">
+        <div
+            id="lkn-cust-total"
+            class="lkn-review-card"
+        >
+            <div class="lkn-title-card">
+                <h3><?php esc_html_e('Total amount (Monthly)', 'lkn-recurrency-give'); ?>
+                </h3>
+            </div>
+            <div
+                id="lkn-value"
+                class="lkn-total-amount"
+            >
+                <p>R$ 0.00</p>
+            </div>
+        </div>
+
+        <div class="lkn-review-card">
+            <div class="lkn-title-card">
+                <h3><?php esc_html_e('Expected amount for next month', 'lkn-recurrency-give'); ?>
+                </h3>
+            </div>
+            <div
+                id="lkn-value-review-monthly"
+                class="lkn-total-amount"
+            >
+                <p>R$ 0.00</p>
+            </div>
+        </div>
+
+        <div class="lkn-review-card">
+            <div class="lkn-title-card">
+                <h3><?php esc_html_e('Expected amount for the year', 'lkn-recurrency-give'); ?>
+                </h3>
+            </div>
+            <div
+                id="lkn-value-review-yearly"
+                class="lkn-total-amount"
+            >
+                <p>R$ 0.00</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="lkn-table">
+        <div class="lkn-title-table">
+            <h3><?php esc_html_e('Recurring Donations Table', 'lkn-recurrency-give'); ?>
+            </h3>
+        </div>
+        <div id="lkn-table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e('Creation Date', 'lkn-recurrency-give'); ?>
+                        </th>
+                        <th><?php esc_html_e('Expiration Date', 'lkn-recurrency-give'); ?>
+                        </th>
+                        <th><?php esc_html_e('Name', 'lkn-recurrency-give'); ?>
+                        </th>
+                        <th><?php esc_html_e('Value', 'lkn-recurrency-give'); ?>
+                        </th>
+                        <th><?php esc_html_e('User ID', 'lkn-recurrency-give'); ?>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="lkn-review-five-container">
+        <div
+            id="lkn-top-five-donations"
+            class="lkn-review-five-card"
+        >
+            <div class="lkn-title-table">
+                <h3><?php esc_html_e('Top 5 Donors', 'lkn-recurrency-give'); ?>
+                </h3>
+            </div>
+            <div class="lkn-top-five-donation-container">
+                <span
+                    class="lkn-error-message"
+                    style="display: none;"
+                ></span>
+                <canvas id="top-five-donations-chart"></canvas>
+            </div>
+        </div>
+        <div
+            id="lkn-last-five-donations"
+            class="lkn-review-five-card"
+        >
+            <div class="lkn-title-table">
+                <h3><?php esc_html_e('Last 5 Donations', 'lkn-recurrency-give'); ?>
+                </h3>
+            </div>
+            <div id="lkn-top-last-donations-list">
+            </div>
+        </div>
+    </div>
+
+    <footer class="lkn-footer">
+        <p>
+
+            <?php printf(
+                // translators: %s - link to the Link Nacional Plugin page
+                // translators: %1$s - link to the Link Nacional Plugin page, %2$s - closing anchor tag
+                esc_html__('Report generated by the %1$sLink Nacional Plugin%2$s', 'lkn-recurrency-give'),
+                '<a href="https://www.linknacional.com.br/wordpress/givewp/" target="_blank">',
+                '</a>'
+            ); ?>
+        </p>
+    </footer>
+</div>

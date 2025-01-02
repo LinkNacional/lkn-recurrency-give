@@ -1,0 +1,66 @@
+<?php
+
+namespace Lkn\RecurrencyGive\Includes;
+
+class LknRecurrencyGiveHelper
+{
+    public static function get_texts()
+    {
+        global $wpdb;
+
+        $backup_message = sprintf(
+            // Translators: %1$s is the first table name, %2$s is the second table name.
+            __('It is recommended that you back up the %1$s and %2$s tables before proceeding with the update. Do you wish to continue?', 'lkn-recurrency-give'),
+            $wpdb->prefix . 'give_subscriptions',
+            $wpdb->prefix . 'give_donationmeta'
+        );
+
+        return [
+            'total_donations' => __('Total donations', 'lkn-recurrency-give'),
+            'date_label' => __('Dates', 'lkn-recurrency-give'),
+            'day_label' => __('Day', 'lkn-recurrency-give'),
+            'num_donations' => __('Number of donations:', 'lkn-recurrency-give'),
+            'no_data' => __('No data for the selected month.', 'lkn-recurrency-give'),
+            'no_data_day' => __('No data for the selected day.', 'lkn-recurrency-give'),
+            'error_message' => __('An error occurred. Please try again.', 'lkn-recurrency-give'),
+            'donation_id' => __('Donation ID:', 'lkn-recurrency-give'),
+            'user_id' => __('User ID:', 'lkn-recurrency-give'),
+            'value' => __('Value:', 'lkn-recurrency-give'),
+            'currency' => __('Currency:', 'lkn-recurrency-give'),
+            'name' => __('Name:', 'lkn-recurrency-give'),
+            'email' => __('Email:', 'lkn-recurrency-give'),
+            'payment_mode' => __('Payment Mode:', 'lkn-recurrency-give'),
+            'creation_date' => __('Creation Date:', 'lkn-recurrency-give'),
+            'expiration' => __('Expiration:', 'lkn-recurrency-give'),
+            'next_month' => __('Expected amount for next month', 'lkn-recurrency-give'),
+            'recurrency' => __('Recurrency', 'lkn-recurrency-give'),
+            'month_label' => __('Select month:', 'lkn-recurrency-give'),
+            'year_label' => __('Select year:', 'lkn-recurrency-give'),
+            'currency_label' => __('Select currency:', 'lkn-recurrency-give'),
+            'payment_mode_label' => __('Select payment mode:', 'lkn-recurrency-give'),
+            'january' => __('January', 'lkn-recurrency-give'),
+            'february' => __('February', 'lkn-recurrency-give'),
+            'march' => __('March', 'lkn-recurrency-give'),
+            'april' => __('April', 'lkn-recurrency-give'),
+            'may' => __('May', 'lkn-recurrency-give'),
+            'june' => __('June', 'lkn-recurrency-give'),
+            'july' => __('July', 'lkn-recurrency-give'),
+            'august' => __('August', 'lkn-recurrency-give'),
+            'september' => __('September', 'lkn-recurrency-give'),
+            'october' => __('October', 'lkn-recurrency-give'),
+            'november' => __('November', 'lkn-recurrency-give'),
+            'december' => __('December', 'lkn-recurrency-give'),
+            'currency_brl' => __('BRL', 'lkn-recurrency-give'),
+            'payment_mode_test' => __('Test', 'lkn-recurrency-give'),
+            'payment_mode_production' => __('Production', 'lkn-recurrency-give'),
+            'reviewButtonTitle' => __('Review', 'lkn-recurrency-give'),
+            'reviewButtonText' => __('Review', 'lkn-recurrency-give'),
+            'reviewIconAlt' => __('Review icon', 'lkn-recurrency-give'),
+            'updating' => __('Updating...', 'lkn-recurrency-give'),
+            'confirm_backup_message' => $backup_message,
+            'updating_text' => __('Updating...', 'lkn-recurrency-give'),
+            'success_message' => __('Update completed successfully!', 'lkn-recurrency-give'),
+            'error_message_update' => __('An error occurred while updating. Please try again.', 'lkn-recurrency-give'),
+        ];
+    }
+}
