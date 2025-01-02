@@ -31,6 +31,7 @@ Link Nacional GiveWP Recurrency é um plugin poderoso que integra com o GiveWP p
 * Top 5 doadores
 * Últimas 5 doações
 * Atualização de dados
+
 Este plugin é ideal para organizações sem fins lucrativos que dependem de doações recorrentes e precisam de uma ferramenta robusta para rastrear e analisar seus dados de doações.
 
 ## Instalação
