@@ -980,6 +980,8 @@
             // If status is true, show the update section
             $('#lkn-update-data').css('display', 'flex')
 
+            $('#update-cielo-btn').off('click')
+
             // Update Cielo data
             $('#update-cielo-btn').on('click', function (e) {
               e.preventDefault()
