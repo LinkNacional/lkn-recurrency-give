@@ -79,7 +79,7 @@ class LknRecurrencyGive
         if (defined('LKN_RECURRENCY_GIVE_VERSION')) {
             $this->version = LKN_RECURRENCY_GIVE_VERSION;
         } else {
-            $this->version = '1.0.1';
+            $this->version = '1.1.0';
         }
         $this->plugin_name = 'lkn-recurrency-give';
 
