@@ -5,6 +5,7 @@ namespace Lkn\RecurrencyGive\Includes;
 use Lkn\RecurrencyGive\Admin\LknRecurrencyGiveAdmin;
 use Lkn\RecurrencyGive\PublicView\LknRecurrencyGivePublic;
 use Give\Donations\Models\Donation;
+use Lkn_Puc_Plugin_UpdateChecker;
 use WP_REST_Response;
 
 /**
@@ -144,6 +145,7 @@ class LknRecurrencyGive
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
         $this->loader->add_action('wp_ajax_lkn_get_recurrency_data', $this, 'lkn_handle_get_recurrency_data');
         $this->loader->add_action('rest_api_init', $this, 'registerApiRoute');
+        $this->loader->add_action('init', $this, 'updater_init');
     }
 
     public function registerApiRoute()
@@ -615,6 +617,17 @@ class LknRecurrencyGive
         } else {
             wp_send_json_error(['message' => __('No donation ID found.', 'lkn-recurrency-give')]);
         }
+    }
+
+    public function updater_init()
+    {
+        require_once __DIR__ . '/plugin-updater/plugin-update-checker.php';
+
+        return new Lkn_Puc_Plugin_UpdateChecker(
+            'https://api.linknacional.com/v2/u?slug=lkn-recurrency-give',
+            LKN_RECURRENCY_GIVE_FILE,
+            'lkn-recurrency-give'
+        );
     }
 
     /**

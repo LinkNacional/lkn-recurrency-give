@@ -219,7 +219,56 @@
             return
           }
 
-          const data = responseData.data
+          const formatResponse = responseData
+
+          if (formatResponse.data.donations) {
+            formatResponse.data.donations.forEach((donation) => {
+              // Extrai a data (YYYY-MM-DD) ignorando a hora
+              const donationDate = donation.created.split(' ')[0] // Ex: "2024-12-31"
+
+              // Calcula o mês da doação
+              const donationMonth = new Date(donationDate + 'T00:00:00Z').getMonth() + 1 // Mês original
+
+              // Substitui a data apenas se o mês for diferente do selecionado
+              if (donationMonth !== parseInt(selectedMonth)) {
+                // Extrai o dia do expiration
+                const expirationDay = new Date(donation.expiration.split(' ')[0] + 'T00:00:00Z').getUTCDate()
+
+                // Atualiza o campo "currentDate"
+                donation.currentDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(expirationDay).padStart(2, '0')} ${donation.created.split(' ')[1]}`
+                donation.day = expirationDay
+              } else {
+                donation.currentDate = donation.created
+              }
+            })
+          } else {
+            $('#recurrencyChart').hide()
+            $('#top-five-donations-chart').hide()
+            $('.lkn-error-message').show().html(responseData.data.message || lknRecurrencyTexts.error_message)
+
+            $('#lkn-table tbody').empty()
+            $('#lkn-top-last-donations-list').empty()
+            $('#lkn-review-button').off('click')
+            $('#lkn-modal-content').empty()
+
+            const selectedCurrency = currencySelect.val()
+            const formatTotal = formatCurrency(selectedCurrency)
+            const monthlyValue = $('#lkn-value')
+            const nextMonthValue = $('#lkn-value-review-monthly')
+            const annualValue = $('#lkn-value-review-yearly')
+
+            const formatTotalMonthly = `<p>${formatTotal.format(0)}</p>`
+            monthlyValue.html(formatTotalMonthly)
+
+            const formatNextMonthTotal = `<p>${formatTotal.format(0)}</p>`
+            nextMonthValue.html(formatNextMonthTotal)
+
+            const formatAnnualTotal = `<p> ${formatTotal.format(0)}</p>`
+            annualValue.html(formatAnnualTotal)
+            return
+          }
+
+          const data = formatResponse.data
 
           let labels = []
           let groupedDonations = []
@@ -236,10 +285,10 @@
           const annualValue = $('#lkn-value-review-yearly')
 
           if (data) {
-            modalSetting(responseData)
-            populateTable(responseData)
-            renderTopFiveDonorsChart(responseData)
-            renderLastFiveDonationsList(responseData)
+            modalSetting(formatResponse)
+            populateTable(formatResponse)
+            renderTopFiveDonorsChart(formatResponse)
+            renderLastFiveDonationsList(formatResponse)
             // Call verifyPluginStatus on page load to set the display state
             verifyPluginStatus()
 
@@ -255,13 +304,7 @@
             const donationSummary = data.donations.reduce(
               (accumulator, donation) => {
                 // Extrai a data (YYYY-MM-DD) ignorando a hora
-                let donationDate = donation.created.split(' ')[0]
-                const donationMonth = new Date(donationDate).getMonth() + 1
-
-                if (donationMonth !== parseInt(selectedMonth)) {
-                  const getDay = new Date(donationDate).getDate()
-                  donationDate = `${selectedYear}-${selectedMonth}-${getDay + 1}`
-                }
+                const donationDate = donation.currentDate.split(' ')[0] // Ex: "2024-12-31"
 
                 // Adiciona a data ao labelsArray, se não existir
                 if (!accumulator.dateLabels.includes(donationDate)) {
@@ -323,7 +366,7 @@
             return index !== -1 ? groupedDonations[index] : 0
           })
 
-          updateChart(daysOfMonth, numberOfDonationsPerDay, responseData)
+          updateChart(daysOfMonth, numberOfDonationsPerDay, formatResponse)
         })
         .fail(function (error) {
           $('#recurrencyChart').hide()
@@ -457,7 +500,7 @@
       const customDay = clickedDate.split(' ')[0].split('-')[2]
 
       // Filtrar as doações para o dia clicado
-      const donationsByDay = responseData.data.donations.filter((donation) => donation.day === customDay)
+      const donationsByDay = responseData.data.donations.filter((donation) => parseInt(donation.day) === parseInt(customDay))
       content += `<h3>${lknRecurrencyTexts.date_label}: ${responseData.data.date}</h3>`
 
       if (donationsByDay.length === 0) {

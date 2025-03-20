@@ -62,6 +62,10 @@ if (! defined('LKN_RECURRENCY_GIVE_BASENAME')) {
     define('LKN_RECURRENCY_GIVE_BASENAME', plugin_basename(LKN_RECURRENCY_GIVE_FILE));
 }
 
+if (! defined('LKN_RECURRENCY_GIVE_FILE')) {
+    define('LKN_RECURRENCY_GIVE_FILE', __FILE__);
+}
+
 /**
  * The code that runs during plugin activation.
  * This action is documented in Includes/LknRecurrencyGiveActivator.php
