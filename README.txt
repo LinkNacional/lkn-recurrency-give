@@ -53,6 +53,11 @@ Yes, the plugin provides options to customize the charts to better suit your nee
 
 == Changelog ==
 
+= 1.1.0 =
+* Plugin updater (Internal).
+* Fix in dates.
+* Documentation and plugin-check verification.
+
 = 1.0.1 =
 * Click event correction.
 
@@ -69,6 +74,9 @@ Yes, the plugin provides options to customize the charts to better suit your nee
 * Remove recurrences without donations.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Documentation.
 
 = 1.0.1 =
 Click event correction.

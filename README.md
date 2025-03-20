@@ -48,6 +48,12 @@ Sim, Link Nacional GiveWP Recurrency é testado e compatível com a versão mais
 
 ## Changelog
 
+### 1.1.0(Atual)
+
+* Plugin updater(Interno).
+* Correção nas datas.
+* Verificação da documentação e plugin-check.
+
 ### 1.0.1
 
 * Correção de evento de click.
