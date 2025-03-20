@@ -41,6 +41,18 @@ jobs:
         filename: '${{ env.PLUGIN_NAME }}.zip'
         exclusions: '*.git* /*node_modules/* .editorconfig'
 
+    # File upload to server
+    - name: Upload .zip to server
+      uses: easingthemes/ssh-deploy@main
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        ARGS: "-lptgoDz"
+        SOURCE: ./${{ env.PLUGIN_NAME }}.zip
+        EXCLUDE: "/.git, /.github, LICENSE.txt, README.md, README.txt, /${{ env.PLUGIN_NAME }}"
+        REMOTE_HOST: ${{ secrets.SSH_HOST }}
+        REMOTE_USER: ${{ secrets.SSH_USER }}
+        TARGET: ${{secrets.DOWNLOAD_FOLDER}}${{ env.PLUGIN_NAME }}.zip
+
     # Update version tag
     - name: Bump version and push tag
       id: tag_version
