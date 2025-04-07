@@ -205,6 +205,7 @@ class LknRecurrencyGive
                                 SELECT expiration
                                 FROM {$wpdb->prefix}give_subscriptions
                                 WHERE id = %d
+                                AND status = 'active'
                             ",
                             $subscription_id
                         )
@@ -283,6 +284,7 @@ class LknRecurrencyGive
                                 SELECT expiration
                                 FROM {$wpdb->prefix}give_subscriptions
                                 WHERE id = %d
+                                AND status = 'active'
                             ",
                             $subscription_id
                         )
@@ -525,10 +527,10 @@ class LknRecurrencyGive
         $end_next_month = gmdate("Y-m-t 23:59:59", strtotime($start_next_month));
 
 
-        $result_month_amount = $wpdb->get_var(
+        $results = $wpdb->get_results(
             $wpdb->prepare(
                 "
-                SELECT SUM(subs.recurring_amount) AS total_amount
+                SELECT subs.id AS subscription_id, subs.recurring_amount
                 FROM
                     {$wpdb->prefix}give_subscriptions AS subs
                 INNER JOIN
@@ -543,8 +545,18 @@ class LknRecurrencyGive
                 $end_next_month
             )
         );
-        $total_month_amount = number_format($result_month_amount, 2);
 
+        // Filtrar por subscription_id único
+        $unique_subs = [];
+        foreach ($results as $row) {
+            if (!isset($unique_subs[$row->subscription_id])) {
+                $unique_subs[$row->subscription_id] = $row->recurring_amount;
+            }
+        }
+
+        // Somar os valores únicos
+        $total_month_amount = array_sum($unique_subs);
+        $total_month_amount = number_format($total_month_amount, 2);
 
         // Start between initial year and final year
         $start_year = "{$year_param}-01-01 00:00:00";
@@ -555,6 +567,7 @@ class LknRecurrencyGive
             $wpdb->prepare(
                 "
                 SELECT
+                    subs.id AS subscription_id,
                     subs.recurring_amount,
                     subs.created,
                     subs.expiration
@@ -575,25 +588,41 @@ class LknRecurrencyGive
             )
         );
 
+        $unique_annual_results = [];
+        $seen_ids = [];
+
+        foreach ($annual_results as $row) {
+            if (!in_array($row->subscription_id, $seen_ids)) {
+                $unique_annual_results[] = $row;
+                $seen_ids[] = $row->subscription_id;
+            }
+        }
+
+        // Atualiza a variável original com os dados únicos
+        $annual_results = $unique_annual_results;
+
         foreach ($annual_results as $result) {
             $created_date = new \DateTime($result->created);
             $expiration_date = new \DateTime($result->expiration);
 
-            // Definir o início e o fim do ano corrente
-            $start_of_year = new \DateTime($start_year);
-            $end_of_year = new \DateTime($end_year);
+            $start_of_year = new \DateTime($start_year); // ex: 2025-01-01
+            $end_of_year = new \DateTime($end_year);     // ex: 2025-12-31
 
-            // Ajustar as datas de criação e expiração para ficarem dentro do intervalo
+            // Garante que vamos contar apenas o período que está dentro do ano
             $effective_start = max($created_date, $start_of_year);
             $effective_end = min($expiration_date, $end_of_year);
 
-            // Calcular os meses válidos apenas no intervalo
+            // Se houver um intervalo válido
             if ($effective_start <= $effective_end) {
-                $interval = $effective_start->diff($effective_end);
-                $months_in_period = ($interval->y * 12) + $interval->m + 1;
+                $period = new \DatePeriod(
+                    $effective_start,
+                    new \DateInterval('P1M'),
+                    (clone $effective_end)->modify('+1 day') // inclui o último mês
+                );
 
-                // Adicionar o valor ao total anual
-                $total_annual_amount += $result->recurring_amount * $months_in_period;
+                $months_in_period = iterator_count($period);
+
+                $total_annual_amount += floatval($result->recurring_amount) * $months_in_period;
             }
         }
 
@@ -602,13 +631,36 @@ class LknRecurrencyGive
 
         // Process the results
         if (count($subscriptions_results) > 0) {
+            $unique_subs = [];
+
             foreach ($subscriptions_results as $result) {
+                $subscription_id = $result->subscription_id;
+
+                // Recuperar a data de conclusão da doação (como timestamp)
+                $completed_date_str = get_post_meta($result->donation_id, '_give_completed_date', true);
+                $completed_date = strtotime($completed_date_str);
+
+                if (!isset($unique_subs[$subscription_id])) {
+                    $result->_completed_timestamp = $completed_date;
+                    $unique_subs[$subscription_id] = $result;
+                } elseif ($completed_date > $unique_subs[$subscription_id]->_completed_timestamp) {
+                    $result->_completed_timestamp = $completed_date;
+                    $unique_subs[$subscription_id] = $result;
+                }
+            }
+
+            $data_grouped['total'] = 0;
+            $data_grouped['donations'] = [];
+
+            foreach ($unique_subs as $result) {
                 $created_date = \DateTime::createFromFormat('Y-m-d H:i:s', $result->created);
                 $result->day = $created_date ? $created_date->format('d') : null;
 
+                unset($result->_completed_timestamp); // remove o campo interno
                 $data_grouped['total'] += $result->recurring_amount;
                 $data_grouped['donations'][] = $result;
             }
+
             $data_grouped['date'] = $date_key;
             $data_grouped['next_month_total'] = $total_month_amount;
             $data_grouped['annual_total'] = $total_annual_amount;

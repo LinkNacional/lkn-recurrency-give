@@ -4,7 +4,7 @@
   $(document).ready(function () {
     let chartInstance = null
     let topFiveDonorsChartIntance = null
-    function getTab () {
+    function getTab() {
       // Cria o botão e o adiciona à navegação
       const customButton = $('<button>', {
         text: lknRecurrencyTexts.recurrency,
@@ -124,6 +124,9 @@
 
             // Chama a função para renderizar o gráfico
             fetchDataAndRenderChart(monthSelect, yearSelect, currencySelect, modeSelect)
+
+            // Call verifyPluginStatus on page load to set the display state
+            verifyPluginStatus()
           })
         },
         error: function (error) {
@@ -170,16 +173,16 @@
       })
     }
 
-    function showLoading () {
+    function showLoading() {
       $('#lkn-recurrency-loading').fadeIn()
     }
 
     // Oculta o loading screen após o carregamento
-    function hideLoading () {
+    function hideLoading() {
       $('#lkn-recurrency-loading').fadeOut()
     }
 
-    function fetchDataAndRenderChart (monthSelect, yearSelect, currencySelect, modeSelect) {
+    function fetchDataAndRenderChart(monthSelect, yearSelect, currencySelect, modeSelect) {
       showLoading()
       const selectedMonth = monthSelect.val()
       const selectedYear = yearSelect.val()
@@ -289,8 +292,6 @@
             populateTable(formatResponse)
             renderTopFiveDonorsChart(formatResponse)
             renderLastFiveDonationsList(formatResponse)
-            // Call verifyPluginStatus on page load to set the display state
-            verifyPluginStatus()
 
             const formatMonthlyTotal = `<p>${formatTotal.format(data.total.toFixed(2))}</p>`
             monthlyValue.html(formatMonthlyTotal)
@@ -397,7 +398,7 @@
         })
     }
 
-    function updateChart (labels, data, responseData) {
+    function updateChart(labels, data, responseData) {
       const currencySelect = $('#currency-select')
       const selectedCurrency = currencySelect.val()
       let dateFomat = 'yyyy-MM-dd'
@@ -487,7 +488,7 @@
       })
     }
 
-    function modalSettingPerDay (responseData, clickedDate) {
+    function modalSettingPerDay(responseData, clickedDate) {
       const modal = $('#lkn-review-modal')
       const modalContent = $('#lkn-modal-content')
       const selectedCurrency = $('#currency-select').val()
@@ -535,7 +536,7 @@
       modal.fadeIn()
     }
 
-    function modalSetting (responseData) {
+    function modalSetting(responseData) {
       // Abrir modal
       $('#lkn-review-button').on('click', function () {
         const modal = $('#lkn-review-modal')
@@ -602,21 +603,21 @@
       })
     }
 
-    function formatCurrency (currency) {
+    function formatCurrency(currency) {
       return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency
       })
     }
 
-    function formatDate (date) {
+    function formatDate(date) {
       const year = date.getFullYear()
       const month = String(date.getMonth() + 1).padStart(2, '0')
       const day = String(date.getDate()).padStart(2, '0')
       return `${year}-${month}-${day}`
     }
 
-    function formatTableDate (dateString) {
+    function formatTableDate(dateString) {
       const date = new Date(dateString)
       const options = { month: 'long', day: 'numeric', year: 'numeric' }
       const formattedDate = date.toLocaleDateString('pt-BR', options)
@@ -624,11 +625,11 @@
       return `${month.charAt(0).toUpperCase() + month.slice(1)} ${day}, ${year}`
     }
 
-    function capitalizeName (name) {
+    function capitalizeName(name) {
       return name.replace(/\b\w/g, char => char.toUpperCase())
     }
 
-    function populateTable (responseData) {
+    function populateTable(responseData) {
       const tableBody = document.querySelector('#lkn-table tbody')
       tableBody.innerHTML = '' // Clear existing rows
 
@@ -648,7 +649,7 @@
       })
     }
 
-    function modalSettingPerDonation (responseData, donationId) {
+    function modalSettingPerDonation(responseData, donationId) {
       const selectedCurrency = $('#currency-select').val()
       const formatTotal = formatCurrency(selectedCurrency)
       const donation = responseData.data.donations.find(d => d.donation_id === donationId)
@@ -689,7 +690,7 @@
       }
     }
 
-    function renderTopFiveDonorsChart (responseData) {
+    function renderTopFiveDonorsChart(responseData) {
       const donations = responseData.data.donations
       const selectedCurrency = $('#currency-select').val()
       const formatTotal = formatCurrency(selectedCurrency)
@@ -768,11 +769,11 @@
       document.getElementById('top-five-donations-chart').style.maxWidth = '400px'
     }
 
-    function getInitials (firstName, lastName) {
+    function getInitials(firstName, lastName) {
       return `${firstName.charAt(0).toUpperCase()}${lastName.charAt(0).toUpperCase()}`
     }
 
-    function renderLastFiveDonationsList (responseData) {
+    function renderLastFiveDonationsList(responseData) {
       const reversedDonations = responseData.data.donations.reverse()
 
       // Inicializar um array para agrupar as doações por customer_id
@@ -827,7 +828,7 @@
       })
     }
 
-    function createToggleMenu () {
+    function createToggleMenu() {
       const menu = $('<div>', {
         id: 'toggleMenu',
         css: {
@@ -964,7 +965,7 @@
     }
 
     // Common function to make an AJAX request
-    function makeRequest (url, button) {
+    function makeRequest(url, button) {
       $.ajax({
         url,
         method: 'POST',
@@ -1010,7 +1011,7 @@
     }
 
     // Function to verify the plugin status
-    function verifyPluginStatus () {
+    function verifyPluginStatus() {
       $.ajax({
         url: '/wp-json/lkn-recurrency/v1/verify', // New endpoint for verification
         method: 'POST',
