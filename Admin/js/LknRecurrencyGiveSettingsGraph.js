@@ -237,8 +237,10 @@
                 // Extrai o dia do expiration
                 const expirationDay = new Date(donation.expiration.split(' ')[0] + 'T00:00:00Z').getUTCDate()
 
+                const validDay = getValidDay(selectedYear, selectedMonth, expirationDay)
+
                 // Atualiza o campo "currentDate"
-                donation.currentDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(expirationDay).padStart(2, '0')} ${donation.created.split(' ')[1]}`
+                donation.currentDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(validDay).padStart(2, '0')} ${donation.created.split(' ')[1]}`
                 donation.day = expirationDay
               } else {
                 donation.currentDate = donation.created
@@ -296,10 +298,20 @@
             const formatMonthlyTotal = `<p>${formatTotal.format(data.total.toFixed(2))}</p>`
             monthlyValue.html(formatMonthlyTotal)
 
-            const formatNextMonthTotal = `<p>${formatTotal.format(parseFloat(data.next_month_total.replace(',', '')))}</p>`
+            let nextMonthDataValue = formatTotal.format(parseFloat(0))
+            if (data?.next_month_total) {
+              nextMonthDataValue = formatTotal.format(parseFloat(data.next_month_total.replace(',', '')))
+            }
+
+            const formatNextMonthTotal = `<p>${nextMonthDataValue}</p>`
             nextMonthValue.html(formatNextMonthTotal)
 
-            const formatAnnualTotal = `<p> ${formatTotal.format(parseFloat(data.annual_total.replace(',', '')))}</p>`
+            let annualTotalDataValue = formatTotal.format(parseFloat(0))
+            if (data?.annual_total) {
+              annualTotalDataValue = formatTotal.format(parseFloat(data.annual_total.replace(',', '')))
+            }
+
+            const formatAnnualTotal = `<p> ${annualTotalDataValue}</p>`
             annualValue.html(formatAnnualTotal)
 
             const donationSummary = data.donations.reduce(
@@ -363,8 +375,23 @@
 
           // Mapear os valores de doações, associando valores a cada data ou null se não houver doação
           const numberOfDonationsPerDay = daysOfMonth.map(label => {
-            const index = labels.indexOf(label)
-            return index !== -1 ? groupedDonations[index] : 0
+            const labelDayMonth = label.slice(5) // pega 'MM-DD'
+
+            // Pega todos os índices que correspondem ao mesmo mês/dia
+            const matchingIndexes = labels
+              .map((date, index) => ({
+                index,
+                match: date.slice(5) === labelDayMonth
+              }))
+              .filter(item => item.match)
+              .map(item => item.index)
+
+            // Soma os valores de groupedDonations para esses índices
+            const total = matchingIndexes.reduce((sum, i) => {
+              return sum + groupedDonations[i]
+            }, 0)
+
+            return total
           })
 
           updateChart(daysOfMonth, numberOfDonationsPerDay, formatResponse)
@@ -559,12 +586,15 @@
             donationsByDay[day].push(donation)
           })
 
+          const sortedKeys = Object.keys(donationsByDay)
+            .sort((a, b) => Number(a) - Number(b)) // ordena por dia
+
           // Adicionar o cabeçalho com a data agrupada
           content += `<h3>${lknRecurrencyTexts.date_label}: ${responseData.data.date}</h3>`
 
           let dayIndex = 0
           // Loop pelos dias e exibição dos dados
-          for (const day in donationsByDay) {
+          for (const day of sortedKeys) {
             content += `<div class="lkn-review-data" style="${dayIndex > 0 ? 'margin-top: 20px' : ''}">`
             content += `<h4>${lknRecurrencyTexts.day_label}: ${day}</h4><ul>`
             donationsByDay[day].forEach((donation, index, array) => {
@@ -1056,6 +1086,12 @@
         }
       })
     }
+
+    function getValidDay(year, month, day) {
+      const lastDay = new Date(year, month, 0).getDate() // retorna o último dia do mês
+      return Math.min(day, lastDay)
+    }
+
     // Carrega os dados iniciais
     getTab()
   })
