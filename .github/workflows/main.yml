@@ -42,7 +42,7 @@ jobs:
       with:
         type: 'zip'
         path: 'build/${{ env.PLUGIN_NAME }}'
-        directory: './dist/'
+        directory: 'dist'
         filename: '${{ env.PLUGIN_NAME }}.zip'
         exclusions: '*.git* /*node_modules/* .editorconfig'
 
