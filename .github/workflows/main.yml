@@ -42,9 +42,13 @@ jobs:
       with:
         type: 'zip'
         path: 'build/${{ env.PLUGIN_NAME }}'
-        directory: 'dist'
+        directory: '.'
         filename: '${{ env.PLUGIN_NAME }}.zip'
         exclusions: '*.git* /*node_modules/* .editorconfig'
+
+    - name: Move .zip to custom location
+      run: |
+        mv build/${{ env.PLUGIN_NAME }}.zip dist/
 
     # File upload to server via FTP
     - name: Upload .zip to server via FTP
