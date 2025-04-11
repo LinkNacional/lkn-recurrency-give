@@ -41,8 +41,8 @@ jobs:
       uses: thedoctor0/zip-release@master
       with:
         type: 'zip'
-        path: 'build/${{ env.PLUGIN_NAME }}'
-        directory: '.'
+        path: '.'
+        directory: 'build/${{ env.PLUGIN_NAME }}'
         filename: '${{ env.PLUGIN_NAME }}.zip'
         exclusions: '*.git* /*node_modules/* .editorconfig'
 
@@ -60,6 +60,7 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }} # Senha FTP
         local-dir: ./dist/ # Diretório local onde o arquivo está
         server-dir: ./wp/ # Diretório remoto onde o arquivo será enviado
+        state-name: './'
         #include: "${{ env.PLUGIN_NAME }}.zip" # Arquivo específico a ser enviado
 
     # File upload to server
