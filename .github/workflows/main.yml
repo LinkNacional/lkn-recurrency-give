@@ -38,11 +38,11 @@ jobs:
     - name: Archive Release
       uses: thedoctor0/zip-release@master
       with:
-        type: 'zip'
-        path: '${{ env.PLUGIN_NAME }}' # Caminho dos arquivos a serem compactados
-        directory: './dist/' # Diretório onde o .zip será salvo
-        filename: '${{ env.PLUGIN_NAME }}.zip' # Nome do arquivo .zip
-        exclusions: '*.git* /*node_modules/* .editorconfig' # Exclusões
+        type: zip
+        path: ${{ env.PLUGIN_NAME }}
+        directory: ./dist/
+        filename: ${{ env.PLUGIN_NAME }}.zip
+        exclusions: '*.git* /*node_modules/* .editorconfig'
 
     # File upload to server via FTP
     - name: Upload .zip to server via FTP
