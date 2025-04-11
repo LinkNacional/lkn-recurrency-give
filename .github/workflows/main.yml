@@ -48,7 +48,7 @@ jobs:
 
     - name: Move .zip to custom location
       run: |
-        mv build/${{ env.PLUGIN_NAME }}.zip dist/
+        mv ./${{ env.PLUGIN_NAME }}.zip dist/
 
     # File upload to server via FTP
     - name: Upload .zip to server via FTP
