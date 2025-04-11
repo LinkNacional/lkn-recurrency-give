@@ -39,7 +39,7 @@ jobs:
       uses: thedoctor0/zip-release@master
       with:
         type: 'zip'
-        path: './${{ env.PLUGIN_NAME }}' # Caminho dos arquivos a serem compactados
+        path: '${{ env.PLUGIN_NAME }}' # Caminho dos arquivos a serem compactados
         directory: './dist/' # Diretório onde o .zip será salvo
         filename: '${{ env.PLUGIN_NAME }}.zip' # Nome do arquivo .zip
         exclusions: '*.git* /*node_modules/* .editorconfig' # Exclusões
