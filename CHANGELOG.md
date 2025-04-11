@@ -1,3 +1,8 @@
+# 1.1.0 - 20/03/2025
+  * Plugin updater(Interno).
+  * Correção nas datas.
+  * Verificação da documentação e plugin-check.
+
 # 1.0.1 - 02/01/2025
   * Correção de evento de click.
 

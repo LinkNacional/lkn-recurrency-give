@@ -4,7 +4,7 @@ Donate link: https://www.linknacional.com.br/
 Tags: recurrency, give, giveWP, donations, dashboard
 Requires at least: 5.7
 Tested up to: 6.7
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -53,6 +53,11 @@ Yes, the plugin provides options to customize the charts to better suit your nee
 
 == Changelog ==
 
+= 1.1.0 =
+* Plugin updater (Internal).
+* Fix in dates.
+* Documentation and plugin-check verification.
+
 = 1.0.1 =
 * Click event correction.
 
@@ -69,6 +74,9 @@ Yes, the plugin provides options to customize the charts to better suit your nee
 * Remove recurrences without donations.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Documentation.
 
 = 1.0.1 =
 Click event correction.

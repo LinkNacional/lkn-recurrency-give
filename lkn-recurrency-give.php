@@ -16,7 +16,7 @@
  * Plugin Name:       Link Nacional GiveWP Recurrency
  * Plugin URI:        https://www.linknacional.com.br/wordpress/givewp/
  * Description:       Plugin created to list and retrieve information about the list of recurring donors in GiveWP.
- * Version:           1.0.1
+ * Version:           1.1.0
  * Author:            Link Nacional
  * Requires Plugins:  give
  * Author URI:        https://linknacional.com.br/
@@ -39,7 +39,7 @@ if (! defined('WPINC')) {
 
 // Consts
 if (! defined('LKN_RECURRENCY_GIVE_VERSION')) {
-    define('LKN_RECURRENCY_GIVE_VERSION', '1.0.1');
+    define('LKN_RECURRENCY_GIVE_VERSION', '1.1.0');
 }
 
 if (! defined('LKN_RECURRENCY_GIVE_MIN_GIVE_VERSION')) {
@@ -60,6 +60,10 @@ if (! defined('LKN_RECURRENCY_GIVE_URL')) {
 
 if (! defined('LKN_RECURRENCY_GIVE_BASENAME')) {
     define('LKN_RECURRENCY_GIVE_BASENAME', plugin_basename(LKN_RECURRENCY_GIVE_FILE));
+}
+
+if (! defined('LKN_RECURRENCY_GIVE_FILE')) {
+    define('LKN_RECURRENCY_GIVE_FILE', __FILE__);
 }
 
 /**

@@ -5,6 +5,7 @@ namespace Lkn\RecurrencyGive\Includes;
 use Lkn\RecurrencyGive\Admin\LknRecurrencyGiveAdmin;
 use Lkn\RecurrencyGive\PublicView\LknRecurrencyGivePublic;
 use Give\Donations\Models\Donation;
+use Lkn_Puc_Plugin_UpdateChecker;
 use WP_REST_Response;
 
 /**
@@ -78,7 +79,7 @@ class LknRecurrencyGive
         if (defined('LKN_RECURRENCY_GIVE_VERSION')) {
             $this->version = LKN_RECURRENCY_GIVE_VERSION;
         } else {
-            $this->version = '1.0.1';
+            $this->version = '1.1.0';
         }
         $this->plugin_name = 'lkn-recurrency-give';
 
@@ -144,6 +145,7 @@ class LknRecurrencyGive
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
         $this->loader->add_action('wp_ajax_lkn_get_recurrency_data', $this, 'lkn_handle_get_recurrency_data');
         $this->loader->add_action('rest_api_init', $this, 'registerApiRoute');
+        $this->loader->add_action('init', $this, 'updater_init');
     }
 
     public function registerApiRoute()
@@ -203,6 +205,7 @@ class LknRecurrencyGive
                                 SELECT expiration
                                 FROM {$wpdb->prefix}give_subscriptions
                                 WHERE id = %d
+                                AND status = 'active'
                             ",
                             $subscription_id
                         )
@@ -281,6 +284,7 @@ class LknRecurrencyGive
                                 SELECT expiration
                                 FROM {$wpdb->prefix}give_subscriptions
                                 WHERE id = %d
+                                AND status = 'active'
                             ",
                             $subscription_id
                         )
@@ -460,10 +464,10 @@ class LknRecurrencyGive
                     meta_email.meta_value AS donor_email,
                     meta_currency.meta_value AS payment_currency,
                     meta_recurring.meta_value AS is_recurring,
+                    meta_total.meta_value AS recurring_amount,
                     subs.id AS subscription_id,
                     subs.customer_id,
                     subs.frequency,
-                    subs.recurring_amount,
                     subs.payment_mode,
                     subs.created,
                     subs.expiration,
@@ -498,15 +502,19 @@ class LknRecurrencyGive
                     {$wpdb->prefix}give_donationmeta AS meta_completed_date
                     ON meta_donor.donation_id = meta_completed_date.donation_id
                     AND meta_completed_date.meta_key = '_give_completed_date'
+                INNER JOIN
+                    {$wpdb->prefix}give_donationmeta AS meta_total
+                    ON meta_donor.donation_id = meta_total.donation_id
+                    AND meta_total.meta_key = '_give_payment_total'
                 WHERE
-                    subs.status = 'active'
+                    subs.status IS NOT NULL
                     AND meta_recurring.meta_value = '1'
-                    AND (%s BETWEEN subs.created AND subs.expiration OR %s BETWEEN subs.created AND subs.expiration)
+                    AND (subs.created <= %s AND subs.expiration >= %s)
                     AND subs.payment_mode = %s
                     AND meta_currency.meta_value = %s
                 ",
-                $start_date,
                 $end_date,
+                $start_date,
                 $mode_param,
                 $currency_param
             )
@@ -517,32 +525,46 @@ class LknRecurrencyGive
             $date_key = "{$month_param}-{$year_param}";
         }
 
-
         // Start between next month
         $start_next_month = gmdate("Y-m-01 00:00:00", strtotime("+1 month", strtotime($start_date)));
         $end_next_month = gmdate("Y-m-t 23:59:59", strtotime($start_next_month));
 
 
-        $result_month_amount = $wpdb->get_var(
+        $results = $wpdb->get_results(
             $wpdb->prepare(
                 "
-                SELECT SUM(subs.recurring_amount) AS total_amount
+                SELECT subs.id AS subscription_id, meta_total.meta_value AS recurring_amount
                 FROM
                     {$wpdb->prefix}give_subscriptions AS subs
                 INNER JOIN
                     {$wpdb->prefix}give_donationmeta AS meta_donor
                     ON subs.id = meta_donor.meta_value
                     AND meta_donor.meta_key = 'subscription_id'
+                INNER JOIN
+                    {$wpdb->prefix}give_donationmeta AS meta_total
+                    ON meta_donor.donation_id = meta_total.donation_id
+                    AND meta_total.meta_key = '_give_payment_total'
                 WHERE
-                    (%s BETWEEN subs.created AND subs.expiration OR %s BETWEEN subs.created AND subs.expiration)
-                    AND subs.status = 'active'
+                    subs.created <= %s AND subs.expiration >= %s
+                    AND subs.payment_mode = %s
                 ",
+                $end_next_month,
                 $start_next_month,
-                $end_next_month
+                $mode_param
             )
         );
-        $total_month_amount = number_format($result_month_amount, 2);
 
+        // Filtrar por subscription_id único
+        $unique_subs = [];
+        foreach ($results as $row) {
+            if (!isset($unique_subs[$row->subscription_id])) {
+                $unique_subs[$row->subscription_id] = $row->recurring_amount;
+            }
+        }
+
+        // Somar os valores únicos
+        $total_month_amount = array_sum($unique_subs);
+        $total_month_amount = number_format($total_month_amount, 2);
 
         // Start between initial year and final year
         $start_year = "{$year_param}-01-01 00:00:00";
@@ -553,7 +575,8 @@ class LknRecurrencyGive
             $wpdb->prepare(
                 "
                 SELECT
-                    subs.recurring_amount,
+                    subs.id AS subscription_id,
+                    meta_total.meta_value AS recurring_amount,
                     subs.created,
                     subs.expiration
                 FROM
@@ -562,59 +585,114 @@ class LknRecurrencyGive
                     {$wpdb->prefix}give_donationmeta AS meta_donor
                     ON subs.id = meta_donor.meta_value
                     AND meta_donor.meta_key = 'subscription_id'
+                INNER JOIN
+                    {$wpdb->prefix}give_donationmeta AS meta_total
+                    ON meta_donor.donation_id = meta_total.donation_id
+                    AND meta_total.meta_key = '_give_payment_total'
                 WHERE
-                    (subs.expiration BETWEEN %s AND %s OR subs.created BETWEEN %s AND %s)
-                    AND subs.status = 'active'
+                    subs.created <= %s AND subs.expiration >= %s
+                    AND subs.payment_mode = %s
                 ",
-                $start_year,
                 $end_year,
                 $start_year,
-                $end_year
+                $mode_param
             )
         );
+
+        $unique_annual_results = [];
+        $seen_ids = [];
+
+        foreach ($annual_results as $row) {
+            if (!in_array($row->subscription_id, $seen_ids)) {
+                $unique_annual_results[] = $row;
+                $seen_ids[] = $row->subscription_id;
+            }
+        }
+
+        // Atualiza a variável original com os dados únicos
+        $annual_results = $unique_annual_results;
 
         foreach ($annual_results as $result) {
             $created_date = new \DateTime($result->created);
             $expiration_date = new \DateTime($result->expiration);
 
-            // Definir o início e o fim do ano corrente
-            $start_of_year = new \DateTime($start_year);
-            $end_of_year = new \DateTime($end_year);
+            $start_of_year = new \DateTime($start_year); // ex: 2025-01-01
+            $end_of_year = new \DateTime($end_year);     // ex: 2025-12-31
 
-            // Ajustar as datas de criação e expiração para ficarem dentro do intervalo
+            // Garante que vamos contar apenas o período que está dentro do ano
             $effective_start = max($created_date, $start_of_year);
             $effective_end = min($expiration_date, $end_of_year);
 
-            // Calcular os meses válidos apenas no intervalo
+            // Se houver um intervalo válido
             if ($effective_start <= $effective_end) {
-                $interval = $effective_start->diff($effective_end);
-                $months_in_period = ($interval->y * 12) + $interval->m + 1;
+                // Calcula a diferença em meses, incluindo mês inicial e final
+                $months_in_period = ($effective_end->format('n') - $effective_start->format('n'))
+                                  + 1
+                                  + 12 * ($effective_end->format('Y') - $effective_start->format('Y'));
 
-                // Adicionar o valor ao total anual
-                $total_annual_amount += $result->recurring_amount * $months_in_period;
+                // Limita no máximo a 12 meses (opcional, dependendo da lógica que você quer)
+                $months_in_period = min($months_in_period, 12);
+
+                $total_annual_amount += floatval($result->recurring_amount) * $months_in_period;
             }
         }
 
         // Formatar o valor total
         $total_annual_amount = number_format($total_annual_amount, 2);
 
+        $data_grouped['next_month_total'] = $total_month_amount;
+        $data_grouped['annual_total'] = $total_annual_amount;
+
         // Process the results
         if (count($subscriptions_results) > 0) {
+            $unique_subs = [];
+
             foreach ($subscriptions_results as $result) {
+                $subscription_id = $result->subscription_id;
+
+                // Recuperar a data de conclusão da doação (como timestamp)
+                $completed_date_str = get_post_meta($result->donation_id, '_give_completed_date', true);
+                $completed_date = strtotime($completed_date_str);
+
+                if (!isset($unique_subs[$subscription_id])) {
+                    $result->_completed_timestamp = $completed_date;
+                    $unique_subs[$subscription_id] = $result;
+                } elseif ($completed_date > $unique_subs[$subscription_id]->_completed_timestamp) {
+                    $result->_completed_timestamp = $completed_date;
+                    $unique_subs[$subscription_id] = $result;
+                }
+            }
+
+            $data_grouped['total'] = 0;
+            $data_grouped['donations'] = [];
+
+
+            foreach ($unique_subs as $result) {
                 $created_date = \DateTime::createFromFormat('Y-m-d H:i:s', $result->created);
                 $result->day = $created_date ? $created_date->format('d') : null;
 
+                unset($result->_completed_timestamp); // remove o campo interno
                 $data_grouped['total'] += $result->recurring_amount;
                 $data_grouped['donations'][] = $result;
             }
+
             $data_grouped['date'] = $date_key;
-            $data_grouped['next_month_total'] = $total_month_amount;
-            $data_grouped['annual_total'] = $total_annual_amount;
 
             wp_send_json_success($data_grouped);
         } else {
-            wp_send_json_error(['message' => __('No donation ID found.', 'lkn-recurrency-give')]);
+            wp_send_json_success($data_grouped);
         }
+    }
+
+    public function updater_init()
+    {
+        require_once __DIR__ . '/plugin-updater/plugin-update-checker.php';
+
+        return new Lkn_Puc_Plugin_UpdateChecker(
+            'https://api.linknacional.com/v2/u?slug=lkn-recurrency-give',
+            LKN_RECURRENCY_GIVE_FILE,
+            'lkn-recurrency-give'
+        );
     }
 
     /**

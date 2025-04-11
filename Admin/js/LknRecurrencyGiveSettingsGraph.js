@@ -124,6 +124,9 @@
 
             // Chama a função para renderizar o gráfico
             fetchDataAndRenderChart(monthSelect, yearSelect, currencySelect, modeSelect)
+
+            // Call verifyPluginStatus on page load to set the display state
+            verifyPluginStatus()
           })
         },
         error: function (error) {
@@ -219,7 +222,58 @@
             return
           }
 
-          const data = responseData.data
+          const formatResponse = responseData
+
+          if (formatResponse.data.donations) {
+            formatResponse.data.donations.forEach((donation) => {
+              // Extrai a data (YYYY-MM-DD) ignorando a hora
+              const donationDate = donation.created.split(' ')[0] // Ex: "2024-12-31"
+
+              // Calcula o mês da doação
+              const donationMonth = new Date(donationDate + 'T00:00:00Z').getMonth() + 1 // Mês original
+
+              // Substitui a data apenas se o mês for diferente do selecionado
+              if (donationMonth !== parseInt(selectedMonth)) {
+                // Extrai o dia do expiration
+                const expirationDay = new Date(donation.expiration.split(' ')[0] + 'T00:00:00Z').getUTCDate()
+
+                const validDay = getValidDay(selectedYear, selectedMonth, expirationDay)
+
+                // Atualiza o campo "currentDate"
+                donation.currentDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(validDay).padStart(2, '0')} ${donation.created.split(' ')[1]}`
+                donation.day = expirationDay
+              } else {
+                donation.currentDate = donation.created
+              }
+            })
+          } else {
+            $('#recurrencyChart').hide()
+            $('#top-five-donations-chart').hide()
+            $('.lkn-error-message').show().html(responseData.data.message || lknRecurrencyTexts.error_message)
+
+            $('#lkn-table tbody').empty()
+            $('#lkn-top-last-donations-list').empty()
+            $('#lkn-review-button').off('click')
+            $('#lkn-modal-content').empty()
+
+            const selectedCurrency = currencySelect.val()
+            const formatTotal = formatCurrency(selectedCurrency)
+            const monthlyValue = $('#lkn-value')
+            const nextMonthValue = $('#lkn-value-review-monthly')
+            const annualValue = $('#lkn-value-review-yearly')
+
+            const formatTotalMonthly = `<p>${formatTotal.format(0)}</p>`
+            monthlyValue.html(formatTotalMonthly)
+
+            const formatNextMonthTotal = `<p>${formatTotal.format(0)}</p>`
+            nextMonthValue.html(formatNextMonthTotal)
+
+            const formatAnnualTotal = `<p> ${formatTotal.format(0)}</p>`
+            annualValue.html(formatAnnualTotal)
+            return
+          }
+
+          const data = formatResponse.data
 
           let labels = []
           let groupedDonations = []
@@ -236,32 +290,34 @@
           const annualValue = $('#lkn-value-review-yearly')
 
           if (data) {
-            modalSetting(responseData)
-            populateTable(responseData)
-            renderTopFiveDonorsChart(responseData)
-            renderLastFiveDonationsList(responseData)
-            // Call verifyPluginStatus on page load to set the display state
-            verifyPluginStatus()
+            modalSetting(formatResponse)
+            populateTable(formatResponse)
+            renderTopFiveDonorsChart(formatResponse)
+            renderLastFiveDonationsList(formatResponse)
 
             const formatMonthlyTotal = `<p>${formatTotal.format(data.total.toFixed(2))}</p>`
             monthlyValue.html(formatMonthlyTotal)
 
-            const formatNextMonthTotal = `<p>${formatTotal.format(parseFloat(data.next_month_total.replace(',', '')))}</p>`
+            let nextMonthDataValue = formatTotal.format(parseFloat(0))
+            if (data?.next_month_total) {
+              nextMonthDataValue = formatTotal.format(parseFloat(data.next_month_total.replace(',', '')))
+            }
+
+            const formatNextMonthTotal = `<p>${nextMonthDataValue}</p>`
             nextMonthValue.html(formatNextMonthTotal)
 
-            const formatAnnualTotal = `<p> ${formatTotal.format(parseFloat(data.annual_total.replace(',', '')))}</p>`
+            let annualTotalDataValue = formatTotal.format(parseFloat(0))
+            if (data?.annual_total) {
+              annualTotalDataValue = formatTotal.format(parseFloat(data.annual_total.replace(',', '')))
+            }
+
+            const formatAnnualTotal = `<p> ${annualTotalDataValue}</p>`
             annualValue.html(formatAnnualTotal)
 
             const donationSummary = data.donations.reduce(
               (accumulator, donation) => {
                 // Extrai a data (YYYY-MM-DD) ignorando a hora
-                let donationDate = donation.created.split(' ')[0]
-                const donationMonth = new Date(donationDate).getMonth() + 1
-
-                if (donationMonth !== parseInt(selectedMonth)) {
-                  const getDay = new Date(donationDate).getDate()
-                  donationDate = `${selectedYear}-${selectedMonth}-${getDay + 1}`
-                }
+                const donationDate = donation.currentDate.split(' ')[0] // Ex: "2024-12-31"
 
                 // Adiciona a data ao labelsArray, se não existir
                 if (!accumulator.dateLabels.includes(donationDate)) {
@@ -319,11 +375,26 @@
 
           // Mapear os valores de doações, associando valores a cada data ou null se não houver doação
           const numberOfDonationsPerDay = daysOfMonth.map(label => {
-            const index = labels.indexOf(label)
-            return index !== -1 ? groupedDonations[index] : 0
+            const labelDayMonth = label.slice(5) // pega 'MM-DD'
+
+            // Pega todos os índices que correspondem ao mesmo mês/dia
+            const matchingIndexes = labels
+              .map((date, index) => ({
+                index,
+                match: date.slice(5) === labelDayMonth
+              }))
+              .filter(item => item.match)
+              .map(item => item.index)
+
+            // Soma os valores de groupedDonations para esses índices
+            const total = matchingIndexes.reduce((sum, i) => {
+              return sum + groupedDonations[i]
+            }, 0)
+
+            return total
           })
 
-          updateChart(daysOfMonth, numberOfDonationsPerDay, responseData)
+          updateChart(daysOfMonth, numberOfDonationsPerDay, formatResponse)
         })
         .fail(function (error) {
           $('#recurrencyChart').hide()
@@ -457,7 +528,7 @@
       const customDay = clickedDate.split(' ')[0].split('-')[2]
 
       // Filtrar as doações para o dia clicado
-      const donationsByDay = responseData.data.donations.filter((donation) => donation.day === customDay)
+      const donationsByDay = responseData.data.donations.filter((donation) => parseInt(donation.day) === parseInt(customDay))
       content += `<h3>${lknRecurrencyTexts.date_label}: ${responseData.data.date}</h3>`
 
       if (donationsByDay.length === 0) {
@@ -515,12 +586,15 @@
             donationsByDay[day].push(donation)
           })
 
+          const sortedKeys = Object.keys(donationsByDay)
+            .sort((a, b) => Number(a) - Number(b)) // ordena por dia
+
           // Adicionar o cabeçalho com a data agrupada
           content += `<h3>${lknRecurrencyTexts.date_label}: ${responseData.data.date}</h3>`
 
           let dayIndex = 0
           // Loop pelos dias e exibição dos dados
-          for (const day in donationsByDay) {
+          for (const day of sortedKeys) {
             content += `<div class="lkn-review-data" style="${dayIndex > 0 ? 'margin-top: 20px' : ''}">`
             content += `<h4>${lknRecurrencyTexts.day_label}: ${day}</h4><ul>`
             donationsByDay[day].forEach((donation, index, array) => {
@@ -877,7 +951,7 @@
         <label for="mode-select">${lknRecurrencyTexts.payment_mode_label}</label>
         <select id="mode-select">
           <option value="test">${lknRecurrencyTexts.payment_mode_test}</option>
-          <option value="production">${lknRecurrencyTexts.payment_mode_production}</option>
+          <option value="live" selected>${lknRecurrencyTexts.payment_mode_production}</option>
         </select>
       `)
 
@@ -1012,6 +1086,12 @@
         }
       })
     }
+
+    function getValidDay(year, month, day) {
+      const lastDay = new Date(year, month, 0).getDate() // retorna o último dia do mês
+      return Math.min(day, lastDay)
+    }
+
     // Carrega os dados iniciais
     getTab()
   })
