@@ -28,8 +28,13 @@ jobs:
         dev: no
 
     # Add plugin files to a root directory
-    - name: Make plugin root directory
-      run: "mkdir $PLUGIN_NAME && mv -t ./$PLUGIN_NAME ./Admin ./Includes ./Languages ./Public *.txt *.php *.json && cp -r ./vendor ./${{env.PLUGIN_NAME}}/vendor && find ./${{env.PLUGIN_NAME}} -type f -exec chmod 0644 {} + && find ./${{env.PLUGIN_NAME}} -type d -exec chmod 0755 {} + && ls -lah"
+    - name: Prepare plugin folder
+      run: |
+        mkdir -p build/${PLUGIN_NAME}
+        mv Admin Includes Languages Public *.php *.txt *.json build/${PLUGIN_NAME}/
+        cp -r vendor build/${PLUGIN_NAME}/vendor
+        find build/${PLUGIN_NAME} -type f -exec chmod 0644 {} +
+        find build/${PLUGIN_NAME} -type d -exec chmod 0755 {} +
 
     # Create a specific directory and archive the plugin as .zip inside it
     - name: Create Output Directory
@@ -39,10 +44,10 @@ jobs:
       uses: thedoctor0/zip-release@master
       with:
         type: 'zip'
-        path: '${{ env.PLUGIN_NAME }}'
-        directory: './dist'
+        path: 'build/${{ env.PLUGIN_NAME }}'
+        directory: './dist/'
         filename: '${{ env.PLUGIN_NAME }}.zip'
-        exclusions: '*.git* /*node_modules/* .editorconfig'
+        exclusions: '*.git* /*node_modules/* .editorconfig .github'
 
     # File upload to server via FTP
     - name: Upload .zip to server via FTP
