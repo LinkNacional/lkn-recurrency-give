@@ -49,7 +49,7 @@ jobs:
         username: ${{ secrets.FTP_USER }} # Usuário FTP
         password: ${{ secrets.FTP_PASSWORD }} # Senha FTP
         local-dir: ./ # Diretório local onde o arquivo está
-        server-dir: ./wp # Diretório remoto onde o arquivo será enviado
+        server-dir: ./wp/ # Diretório remoto onde o arquivo será enviado
         include: "${{ env.PLUGIN_NAME }}.zip" # Arquivo específico a ser enviado
 
     # File upload to server
