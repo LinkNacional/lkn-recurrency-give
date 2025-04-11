@@ -31,8 +31,8 @@ jobs:
     - name: Prepare plugin folder
       run: |
         mkdir -p dist
-        mkdir -p build/${PLUGIN_NAME}
-        mv ./Admin ./Includes ./Languages ./Public *.php *.txt *.json ./build/${PLUGIN_NAME}/
+        mkdir -p build
+        mv ./Admin ./Includes ./Languages ./Public *.php *.txt *.json ./build
         cp -r vendor build/${PLUGIN_NAME}/vendor
         find ./build/${PLUGIN_NAME} -type f -exec chmod 0644 {} +
         find ./build/${PLUGIN_NAME} -type d -exec chmod 0755 {} +
@@ -42,7 +42,7 @@ jobs:
       with:
         type: 'zip'
         path: '.'
-        directory: 'build/${{ env.PLUGIN_NAME }}'
+        directory: 'build'
         filename: '${{ env.PLUGIN_NAME }}.zip'
         exclusions: '*.git* /*node_modules/* .editorconfig'
 
