@@ -38,10 +38,10 @@ jobs:
     - name: Archive Release
       uses: thedoctor0/zip-release@master
       with:
-        type: zip
-        path: ${{ env.PLUGIN_NAME }}
-        directory: ./dist/
-        filename: ${{ env.PLUGIN_NAME }}.zip
+        type: 'zip'
+        path: '${{ env.PLUGIN_NAME }}'
+        directory: './dist'
+        filename: '${{ env.PLUGIN_NAME }}.zip'
         exclusions: '*.git* /*node_modules/* .editorconfig'
 
     # File upload to server via FTP
