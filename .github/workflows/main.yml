@@ -31,15 +31,19 @@ jobs:
     - name: Make plugin root directory
       run: "mkdir $PLUGIN_NAME && mv -t ./$PLUGIN_NAME ./Admin ./Includes ./Languages ./Public *.txt *.php *.json && cp -r ./vendor ./${{env.PLUGIN_NAME}}/vendor && find ./${{env.PLUGIN_NAME}} -type f -exec chmod 0644 {} + && find ./${{env.PLUGIN_NAME}} -type d -exec chmod 0755 {} + && ls -lah"
 
-    # Compact plugin as .zip
+    # Create a specific directory and archive the plugin as .zip inside it
+    - name: Create Output Directory
+      run: mkdir -p ./dist
+
     - name: Archive Release
       uses: thedoctor0/zip-release@master
       with:
         type: 'zip'
-        path: '${{ env.PLUGIN_NAME }}'
-        directory: '.'
-        filename: '${{ env.PLUGIN_NAME }}.zip'
-        exclusions: '*.git* /*node_modules/* .editorconfig'
+        path: '${{ env.PLUGIN_NAME }}' # Caminho dos arquivos a serem compactados
+        directory: './dist' # Diretório onde o .zip será salvo
+        filename: '${{ env.PLUGIN_NAME }}.zip' # Nome do arquivo .zip
+        exclusions: '*.git* /*node_modules/* .editorconfig' # Exclusões
+
     # File upload to server via FTP
     - name: Upload .zip to server via FTP
       uses: SamKirkland/FTP-Deploy-Action@4.3.0
@@ -48,7 +52,7 @@ jobs:
         port: ${{ secrets.FTP_PORT }}
         username: ${{ secrets.FTP_USER }} # Usuário FTP
         password: ${{ secrets.FTP_PASSWORD }} # Senha FTP
-        local-dir: ./ # Diretório local onde o arquivo está
+        local-dir: ./dist/ # Diretório local onde o arquivo está
         server-dir: ./wp/ # Diretório remoto onde o arquivo será enviado
         #include: "${{ env.PLUGIN_NAME }}.zip" # Arquivo específico a ser enviado
 
