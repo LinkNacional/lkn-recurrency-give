@@ -31,19 +31,10 @@ jobs:
     - name: Prepare plugin folder
       run: |
         mkdir -p build/${PLUGIN_NAME}
-        mv Admin Includes Languages Public *.php *.txt *.json build/${PLUGIN_NAME}/
+        mv Admin Includes Languages Public *.php *.txt *.json ./build/${PLUGIN_NAME}/
         cp -r vendor build/${PLUGIN_NAME}/vendor
-        find build/${PLUGIN_NAME} -type f -exec chmod 0644 {} +
-        find build/${PLUGIN_NAME} -type d -exec chmod 0755 {} +
-
-    # Create a specific directory and archive the plugin as .zip inside it
-    - name: Create Output Directory
-      run: mkdir -p ./dist
-
-    - name: Debug - List build contents
-      run: |
-        echo "Conteúdo de build/${PLUGIN_NAME}:"
-        ls -lah build/${PLUGIN_NAME}
+        find ./build/${PLUGIN_NAME} -type f -exec chmod 0644 {} +
+        find ./build/${PLUGIN_NAME} -type d -exec chmod 0755 {} +
 
     - name: Archive Release
       uses: thedoctor0/zip-release@master
@@ -62,7 +53,7 @@ jobs:
         port: ${{ secrets.FTP_PORT }}
         username: ${{ secrets.FTP_USER }} # Usuário FTP
         password: ${{ secrets.FTP_PASSWORD }} # Senha FTP
-        local-dir: ./dist/ # Diretório local onde o arquivo está
+        local-dir: ./build/ # Diretório local onde o arquivo está
         server-dir: ./wp/ # Diretório remoto onde o arquivo será enviado
         #include: "${{ env.PLUGIN_NAME }}.zip" # Arquivo específico a ser enviado
 
