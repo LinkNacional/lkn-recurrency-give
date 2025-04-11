@@ -31,7 +31,7 @@ jobs:
     - name: Prepare plugin folder
       run: |
         mkdir -p build/${PLUGIN_NAME}
-        mv Admin Includes Languages Public *.php *.txt *.json ./build/${PLUGIN_NAME}/
+        mv ./Admin ./Includes ./Languages ./Public *.php *.txt *.json ./build/${PLUGIN_NAME}/
         cp -r vendor build/${PLUGIN_NAME}/vendor
         find ./build/${PLUGIN_NAME} -type f -exec chmod 0644 {} +
         find ./build/${PLUGIN_NAME} -type d -exec chmod 0755 {} +
@@ -53,7 +53,7 @@ jobs:
         port: ${{ secrets.FTP_PORT }}
         username: ${{ secrets.FTP_USER }} # Usuário FTP
         password: ${{ secrets.FTP_PASSWORD }} # Senha FTP
-        local-dir: ./build/ # Diretório local onde o arquivo está
+        local-dir: ./ # Diretório local onde o arquivo está
         server-dir: ./wp/ # Diretório remoto onde o arquivo será enviado
         #include: "${{ env.PLUGIN_NAME }}.zip" # Arquivo específico a ser enviado
 
