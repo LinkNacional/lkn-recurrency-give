@@ -33,7 +33,7 @@ jobs:
         mkdir -p dist
         mkdir -p build
         mv ./Admin ./Includes ./Languages ./Public *.php *.txt *.json ./build
-        cp -r vendor build/${PLUGIN_NAME}/vendor
+        cp -r vendor build/vendor
         find ./build -type f -exec chmod 0644 {} +
         find ./build -type d -exec chmod 0755 {} +
 
