@@ -51,6 +51,7 @@ Sim, Link Nacional GiveWP Recurrency é testado e compatível com a versão mais
 ### 1.1.1 - 06/08/2025 - (Atual)
 
 * Correção no action.
+* Atuazação no Readme.
 
 ### 1.1.0
 

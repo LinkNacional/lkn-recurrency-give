@@ -55,6 +55,7 @@ Yes, the plugin provides options to customize the charts to better suit your nee
 
 = 1.1.0 - 2025/08/06 =
 * Fix action.
+* Readme update.
 
 = 1.1.0 =
 * Plugin updater (Internal).
@@ -77,6 +78,9 @@ Yes, the plugin provides options to customize the charts to better suit your nee
 * Remove recurrences without donations.
 
 == Upgrade Notice ==
+
+= 1.1.1 =
+Documentation.
 
 = 1.1.0 =
 Documentation.
