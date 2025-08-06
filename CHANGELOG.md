@@ -1,3 +1,6 @@
+# 1.1.1 - 06/08/2025
+  * Correção no action.
+
 # 1.1.0 - 20/03/2025
   * Plugin updater(Interno).
   * Correção nas datas.
