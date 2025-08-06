@@ -46,11 +46,26 @@ Este plugin é ideal para organizações sem fins lucrativos que dependem de doa
 
 Sim, Link Nacional GiveWP Recurrency é testado e compatível com a versão mais recente do GiveWP.
 
+## Screenshots
+
+1. **Dashboard Principal** - Visão geral com métricas principais e gráficos
+   ![Dashboard Principal](Includes/assets/imgs/mainDashboard.png)
+
+2. **Gráfico de Doações** - Gráfico detalhado mostrando tendências de doações
+   ![Gráfico de Doações](Includes/assets/imgs/donationGrath.png)
+
+3. **Subgráfico Detalhado** - Análise mais específica dos dados
+   ![Subgráfico](Includes/assets/imgs/subGrath.png)
+
+4. **Detalhes das Doações** - Interface para visualização de detalhes adicionais e gestão de doações
+   ![Detalhes das Doações](Includes/assets/imgs/donationDetails.png)
+
 ## Changelog
 
 ### 1.1.1 - 06/08/2025 - (Atual)
 
 * Correção no action.
+* Atuazação no Readme.
 
 ### 1.1.0
 
