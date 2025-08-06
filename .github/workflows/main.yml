@@ -32,8 +32,8 @@ jobs:
       run: |
         mkdir -p dist
         mkdir -p build
-        mv ./Admin ./Includes ./Languages ./Public *.php *.txt CHANGELOG.md ./build
-        cp -r vendor build/vendor
+        mv ./Admin ./Includes ./Languages ./Public *.php *.txt CHANGELOG.md ./build/${{ env.PLUGIN_NAME }}
+        cp -r vendor ./build/${{ env.PLUGIN_NAME }}/vendor
         find ./build -type f -exec chmod 0644 {} +
         find ./build -type d -exec chmod 0755 {} +
 
